@@ -8,19 +8,21 @@
 #
 
 function replace_iptables() {
-	local CID
-	local SEDCMD
-	for CID in $(docker ps -q -a); do
-		local NAME=$(docker inspect --format '{{ .Name }}' $CID | awk '{ print substr($0, 2, length($0)-1) }')
-		local IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID)
-		if [ -z "$IP" ]; then
-			continue
-		fi
+        local CID
 
-		SEDCMD="$SEDCMD -e s!$IP/32!${NAME}!g"
-	done
+        local SEDCMD=""
+        for CID in $(docker ps -q -a); do
+                local NAME=$(docker inspect --format '{{ .Name }}' $CID | awk '{ print substr($0, 2, length($0)-1) }')
+                local IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID)
 
-	sed $SEDCMD
+                if [ -z "$IP" ]; then
+                        continue
+                fi
+
+                SEDCMD="$SEDCMD -e s!$IP/32!${NAME}!g -e s!$IP!${NAME}!g"
+        done
+
+        sed $SEDCMD
 }
 
 iptables-save $@ | replace_iptables
