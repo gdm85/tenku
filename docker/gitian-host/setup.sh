@@ -5,11 +5,17 @@
 ## (thus most of the comment are his voice)
 #
 
-set -e
+## prevent (re)starting of sshd
+## we want to use sshd as our container process
+echo -e "#!/bin/sh\nexit 101" > /usr/sbin/policy-rc.d && \
+chmod +x /usr/sbin/policy-rc.d
 
 ## regenerate host keys
-/bin/rm -v /etc/ssh/ssh_host_*
-dpkg-reconfigure openssh-server
+/bin/rm -v /etc/ssh/ssh_host_* && \
+dpkg-reconfigure -f noninteractive openssh-server || exit $?
+
+## removed, in case you want to install other packages at container-time
+rm /usr/sbin/policy-rc.d
 
 # First, make sure that cgroups are mounted correctly.
 CGROUP=/sys/fs/cgroup
@@ -95,6 +101,8 @@ source /home/debian/.bash_profile
 ## bridge to be used by gitian LXC container
 brctl addbr br0 && \
 ifconfig br0 ${GITIAN_HOST_IP}/16 up || exit $?
+
+##NOTE: *DO NOT* try to add eth0 to the bridge, it will kill container's networking
 
 ## temporary workaround until this bug is fixed: https://bugs.launchpad.net/ubuntu/+source/sysvinit/+bug/891045
 umount /dev/shm
