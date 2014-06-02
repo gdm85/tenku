@@ -3,12 +3,12 @@
 ## VERSION 0.1.0
 ##
 ## gitian host privileged container
-## see also https://github.com/gdm85/tenku/tree/master/docker/gitian-builder-host.md
+## see also https://github.com/gdm85/tenku/tree/master/docker/gitian-host/README.md
 ##
 #
 
 ## this image must be debootstrapped with build-wheezy.sh
-FROM wheezy
+FROM gdm85/wheezy
 
 MAINTAINER Giuseppe Mazzotta "gdm85@users.noreply.github.com"
 

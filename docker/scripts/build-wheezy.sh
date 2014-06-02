@@ -26,7 +26,7 @@ TMPDIR=$PWD/$DISTNAME
 
 debootstrap $DISTNAME $DISTNAME $DEBIAN_REPO && \
 cd $DISTNAME && \
-tar -c . | docker import - $DISTNAME
+tar -c . | docker import - gdm85/$DISTNAME
 RV=$?
 
 # always perform cleanup
