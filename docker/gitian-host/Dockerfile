@@ -37,13 +37,14 @@ EXPOSE 22
 RUN echo "%sudo ALL=NOPASSWD: /usr/bin/lxc-start" > /etc/sudoers.d/gitian-lxc
 RUN echo 'debian ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/debian-sudo
 
-RUN useradd -m -s /bin/bash debian && adduser debian sudo
+##NOTE: all the chown/chmod hacks are workarounds to docker's glitches
+RUN useradd -m -s /bin/bash debian && adduser debian sudo && mkdir /home/debian/.ssh && chown debian.debian /home/debian/.ssh
+
+WORKDIR /home/debian
 
 ## provide authorized keys to allow connections inside host
 ADD authorized_keys /home/debian/.ssh/authorized_keys
-RUN chmod -R go-rwx /home/debian/.ssh
-
-WORKDIR /home/debian
+RUN chown -R debian.debian .ssh && chmod -R go-rwx /home/debian/.ssh
 
 ## download in clear HTTP & check md5 right afterwards
 RUN wget http://archive.ubuntu.com/ubuntu/pool/universe/v/vm-builder/vm-builder_0.12.4+bzr489.orig.tar.gz && echo "ec12e0070a007989561bfee5862c89a32c301992dd2771c4d5078ef1b3014f03  vm-builder_0.12.4+bzr489.orig.tar.gz" | sha256sum -c

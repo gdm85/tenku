@@ -109,4 +109,7 @@ umount /dev/shm
 rmdir /dev/shm
 ln -s /run/shm /dev/shm
 
+## test that debian user has access to its own .ssh (yes, Docker glitches crawling...)
+su -c 'cat /home/debian/.ssh/authorized_keys' -l -- debian || exit $?
+
 echo "Gitian host configuration for LXC guests completed successfully"
