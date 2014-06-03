@@ -1,3 +1,7 @@
+## gitian-bitcoin-host
+##
+## VERSION 0.1.0
+##
 
 FROM gdm85/gitian-host
 
@@ -9,8 +13,10 @@ ADD gitian.patch /home/debian/
 
 WORKDIR /home/debian
 
+## patch to allow paralle creation of VMs
 RUN cd gitian-builder && patch -p1 < ../gitian.patch
 
 ADD build-bitcoin.sh /home/debian/
+ADD sign.sh /home/debian/
 
 RUN chown -R debian.debian /home/debian/
