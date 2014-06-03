@@ -11,7 +11,6 @@ WORKDIR /home/debian
 
 RUN cd gitian-builder && patch -p1 < ../gitian.patch
 
-ADD step1.sh /home/debian/
-ADD step2.sh /home/debian/
+ADD build-bitcoin.sh /home/debian/
 
 RUN chown -R debian.debian /home/debian/

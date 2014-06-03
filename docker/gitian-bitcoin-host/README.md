@@ -5,58 +5,40 @@ This image currently supports only building of bitcoin 0.9.1, but it can be easi
 
 It is based on https://github.com/bitcoin/bitcoin/blob/0.9.1/doc/release-process.md (and more recent versions).
 
+Before proceeding make sure you have created the necessary gdm85/wheezy and gdm85/gitian-host images, see [these instructions](../gitian-host/README.md).
+
+Afterwards you can create this image by running scripts/create-gitian-bitcoin-host.sh.
+
 Preparing the gitian environment
 --------------------------------
 
-First, login into the freshly spawned gitian-host container with 'debian' user. If you login via ssh then do not forget to discard environment with:
+If you have already prepared the base VMs inside the gitian host container, all what you need to do is:
 
 ```sh
-ssh -o SendEnv= debian@your-gitian-host
-```
-This is to overcome an issue in gitian-builder that allows pollution of the LXC environment.
-
-Step 1: base VMs
-----------------
-
-Step 1 is a script that allows creation of the base VMs. In your debian home directory, as debian user, run:
-
-```sh
-./step1.sh
+ssh -o SendEnv= debian@your-gitian-host ./build-bitcoin.sh
 ```
 
-And wait for the creation of i386 and amd64 images.
-Once done, you have prepared a gitian builder environment for deterministic bitcoin builds. You might want to stop the container and create an image to store away so that in future you can fork from here for new builds.
+That is a script that will build dependencies and bitcoin for both i386 and amd64 Linux architectures.
 
-Step 2: building dependencies & bitcoin
----------------------------------------
-
-This will build all dependencies:
-```sh
-./step2.sh
-```
-
-(You can also run both step1.sh and step2.sh altogether):
-```sh
-ssh -o SendEnv= debian@your-gitian-host "step1.sh && step2.sh"
-```
+**NOTE:** the SendEnv= is there to overcome an issue in gitian-builder that allows pollution of the LXC environment.
 
 Signing
 -------
 
 Now you have completed the build of bitcoin and only the signing part is left.
-Before doing that, you can inspect that signatures are matching with other developers by peeking inside ~/gitian.sigs
+Before doing that, you can inspect that signatures are matching with other developers by peeking inside ~/gitian.sigs of the running container.
 
-Script to sign the build:
+In order to sign you have to either put your private key in the container's ~/.gnupg or perform the signing externally, at your option.
+If you have the private key in the container (so displayed by `gpg -K`), then you can use this script:
 ```bash
 #!/bin/bash
 set -e
 export SIGNER=yourSignerName
 export VERSION=0.9.1
 
+cd gitian-builder
 ./bin/gsign --signer $SIGNER --release ${VERSION} --destination ../gitian.sigs/ ../bitcoin/contrib/gitian-descriptors/gitian-linux.yml
 ```
-
-***NOTE:*** this will fail if you do not have $SIGNER's secret key in `gpg -K`
 
 Submitting your signature
 -------------------------
