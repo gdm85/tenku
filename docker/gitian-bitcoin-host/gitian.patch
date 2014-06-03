@@ -1,0 +1,21 @@
+diff --git a/bin/make-base-vm b/bin/make-base-vm
+index c1920f3..8a44f13 100755
+--- a/bin/make-base-vm
++++ b/bin/make-base-vm
+@@ -109,16 +109,3 @@ rm -rf $OUT
+ sudo vmbuilder kvm ubuntu --rootsize 10240 --arch=$ARCH --suite=$SUITE --addpkg=$addpkg --removepkg=$removepkg --ssh-key=var/id_dsa.pub --ssh-user-key=var/id_dsa.pub --mirror=$MIRROR --secu
+ mv $OUT/*.qcow2 $OUT.qcow2
+ rm -rf $OUT
+-
+-if [ $LXC = "1" ]; then
+-    #sudo debootstrap --include=$addpkg --arch=$ARCH $SUITE $OUT-root $MIRROR
+-    echo Extracting partition for lxc
+-    qemu-img convert $OUT.qcow2 $OUT.raw
+-    loop=`sudo kpartx -av $OUT.raw|sed -n '/loop.p1/{s/.*loop\(.\)p1.*/\1/;p}'`
+-    sudo cp --sparse=always /dev/mapper/loop${loop}p1 $OUT
+-    sudo chown $USER $OUT
+-    sudo kpartx -d /dev/loop$loop
+-    rm -f $OUT.raw
+-    # bootstrap-fixup is done in libexec/make-clean-vm
+-fi
+-
