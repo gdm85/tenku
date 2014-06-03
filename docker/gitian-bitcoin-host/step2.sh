@@ -11,7 +11,11 @@ if [[ "$VERSION" != "0.9.1" ]]; then
 	exit 2
 fi
 
-cd gitian-builder
+git clone https://github.com/bitcoin/bitcoin.git
+cd bitcoin
+git checkout v${VERSION}
+
+cd ../gitian-builder
 mkdir -p inputs; cd inputs/
 
 ##
