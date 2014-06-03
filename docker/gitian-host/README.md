@@ -3,8 +3,8 @@ Gitian host docker container
 
 This image contains a [Dockerfile](http://docs.docker.io/reference/builder/) to generate a [gitian-builder](https://gitian.org/) host image, that can subsequently be used for reproducible builds using LXC VMs.
 
-Hierarchy:
-```<your real host (running docker daemon)> -> gitian-host docker container -> <i386/amd64 LXC containers used to perform gbuilds>```
+How this works:
+<img src="diagram.png">
 
 See also https://github.com/devrandom/gitian-builder/issues/53
 
