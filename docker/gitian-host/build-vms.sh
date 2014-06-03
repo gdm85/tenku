@@ -1,17 +1,10 @@
 #!/bin/bash
 set -e
 
-if [[ -z "$VERSION" ]]; then
-	echo "Please define VERSION environment variable for bitcoin checkout" 1>&2
-	exit 1
-fi
 
 source ~/.bash_profile
 
-git clone https://github.com/bitcoin/bitcoin.git
-cd bitcoin
-git checkout v${VERSION}
-cd ../gitian-builder
+cd gitian-builder
 mkdir -p var
 if [ ! -e var/id_dsa ]; then
   ssh-keygen -t dsa -f var/id_dsa -N ""

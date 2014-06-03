@@ -55,6 +55,9 @@ RUN echo 'export USE_LXC=1' >> .bash_profile
 RUN echo 'export GITIAN_HOST_IP=10.0.3.2' >> .bash_profile
 RUN echo 'export LXC_GUEST_IP=10.0.3.5' >> .bash_profile
 
+## script used to build base VMs
+ADD build-base-vms.sh /home/debian/
+
 RUN git clone https://github.com/devrandom/gitian-builder.git --depth=1
 RUN chown -R debian.debian . && chown -R apt-cacher-ng.apt-cacher-ng /var/cache/apt-cacher-ng/
 
