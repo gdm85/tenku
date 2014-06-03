@@ -1,6 +1,8 @@
 #!/bin/bash
 
-cd ../gitian-host || exit $?
+BASENAME=$(dirname $(readlink -m $0))
+
+cd $BASENAME/../gitian-host || exit $?
 
 if [ ! -f authorized_keys ]; then
 	echo "No authorized_keys file found in $PWD"

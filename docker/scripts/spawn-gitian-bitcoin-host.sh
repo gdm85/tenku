@@ -2,7 +2,7 @@
 
 set -e
 
-CID=$(docker run -d --privileged gdm85/gitian-host) || exit $?
+CID=$(docker run -d --privileged gdm85/gitian-bitcoin-host) || exit $?
 IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID) || exit $?
 
 echo "You can now SSH into container $CID:"
