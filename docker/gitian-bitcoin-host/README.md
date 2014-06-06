@@ -2,13 +2,12 @@ Building bitcoin with a gitian-builder Docker container
 =======================================================
 
 This image allows automated gitian builds of bitcoin using a docker container.
-Before proceeding make sure you have created the necessary *wheezy* and *gitian-host* images, see [these instructions](../gitian-host/README.md).
+Before proceeding make sure you have created the necessary *wheezy* and *gitian-host* images, see [these instructions](../gitian-host/README.md) for the creation of both.
 
-Afterwards you can create the image by running [create-gitian-bitcoin-host.sh).
-](../scripts/create-gitian-bitcoin-host.sh).
+Afterwards you can create the *gitian-bitcoin-host* image by running [scripts/create-gitian-bitcoin-host.sh](../scripts/create-gitian-bitcoin-host.sh).
 
 NOTE: this image currently supports only building of bitcoin 0.9.1, but it can be easily adapted to build other versions.
-You can submit the source lists for other versions as a patch or pull request.
+You can submit the source lists for other versions as a patch or pull request, see directory [input-sources/](input-sources/) for currently available versions.
 
 Preamble
 --------
@@ -24,20 +23,39 @@ See also:
 - https://www.docker.io/
 - http://www.ubuntu.com/
 
+Spawning a container
+--------------------
+
+You can spawn a new container for Gitian bitcoin builds with:
+
+- [scripts/spawn-gitian-bitcoin-host.sh](scripts/spawn-gitian-bitcoin-host.sh)
+
+This script will create the running docker container and provide details about how to connect via SSH to the container, example:
+```
+$ scripts/spawn-gitian-bitcoin-host.sh
+You can now SSH into container 3bc0d0611374ca4d4730fd5fb1067808b1bcfd072ec7cf029393a7fd99ec856e:
+ssh -o SendEnv= -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@172.17.0.3
+$ 
+```
+
+Use this specific SSH command line to get a shell in the container and proceed to next steps.
+
+**NOTE:** the SendEnv= is there to overcome an [issue](https://github.com/devrandom/gitian-builder/issues/56) in gitian-builder that allows pollution of the LXC environment.
+
 Preparing the gitian environment
 --------------------------------
 
-If you have already prepared the base VMs ([/build-base-vms.sh](../gitian-host/build-base-vms.sh)) inside the gitian host container, all what you need to do is:
+First prepare the base VMs inside the gitian host container by running:
 
-```sh
-ssh -o SendEnv= debian@your-gitian-host ./build-bitcoin.sh 0.9.1
-```
+- [./build-base-vms.sh](../gitian-host/build-base-vms.sh)
+
+This operation will take a while; afterwards you can proceed to building bitcoin with:
+
+- [./build-bitcoin.sh](build-bitcoin.sh) 0.9.1
 
 Notice the parameter 0.9.1, that is the version we are going to build.
 
 [build-bitcoin.sh](build-bitcoin.sh) is a script that will download & build all the dependencies and then bitcoin itself, for both i386 and amd64 Linux architectures.
-
-**NOTE:** the SendEnv= is there to overcome an [issue](https://github.com/devrandom/gitian-builder/issues/56) in gitian-builder that allows pollution of the LXC environment.
 
 Signing
 -------
