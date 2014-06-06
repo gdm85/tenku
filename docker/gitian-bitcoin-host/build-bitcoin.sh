@@ -31,4 +31,6 @@ cd ..
 mv build/out/boost-*.zip inputs/
 ./bin/gbuild ../bitcoin/contrib/gitian-descriptors/deps-linux.yml || exit $?
 mv build/out/bitcoin-deps-*.zip inputs/
-./bin/gbuild --commit bitcoin=v${VERSION} ../bitcoin/contrib/gitian-descriptors/gitian-linux.yml
+./bin/gbuild --commit bitcoin=v${VERSION} ../bitcoin/contrib/gitian-descriptors/gitian-linux.yml || exit $?
+echo "Completed successfully."
+echo "The output files are in: gitian-builder/build/out/"
