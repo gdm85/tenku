@@ -25,7 +25,7 @@ function ext_partition() {
 	sudo chown $USER $OUT
 	sudo sync
 	sleep 5
-	sudo kpartx -d /dev/loop$loop
+	sudo kpartx -d /dev/loop$loop 2>/dev/null
 	sudo rm /dev/mapper/loop${loop}p1
 	rm -f $OUT.raw
 }
