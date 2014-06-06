@@ -34,13 +34,11 @@ This script will create the running docker container and provide details about h
 ```
 $ scripts/spawn-gitian-bitcoin-host.sh
 You can now SSH into container 3bc0d0611374ca4d4730fd5fb1067808b1bcfd072ec7cf029393a7fd99ec856e:
-ssh -o SendEnv= -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@172.17.0.3
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@172.17.0.3
 $ 
 ```
 
-Use this specific SSH command line to get a shell in the container and proceed to next steps.
-
-**NOTE:** the SendEnv= is there to overcome an [issue](https://github.com/devrandom/gitian-builder/issues/56) in gitian-builder that allows pollution of the LXC environment.
+You can use this specific SSH command line to get a shell in the container and proceed to next steps.
 
 Preparing the gitian environment
 --------------------------------

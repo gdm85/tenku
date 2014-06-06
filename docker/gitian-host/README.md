@@ -23,7 +23,7 @@ Afterwards you can spawn a gitian-host container as follows:
 ```
 $ scripts/spawn-gitian-host.sh
 You can now SSH into container 8a955ff5607b62d4c295745f27bbc38f2e8e011ea93053e641617d50ad2aa5a2:
-ssh -o SendEnv= -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@172.17.0.2
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@172.17.0.2
 $ 
 ```
 

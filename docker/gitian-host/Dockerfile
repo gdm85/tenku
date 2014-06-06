@@ -51,15 +51,13 @@ RUN wget http://archive.ubuntu.com/ubuntu/pool/universe/v/vm-builder/vm-builder_
 RUN tar -zxvf vm-builder_0.12.4+bzr489.orig.tar.gz && cd vm-builder-0.12.4+bzr489 && python setup.py install
 
 ## these must always be loaded when you login as 'debian' user
-RUN echo 'export USE_LXC=1' >> .bash_profile
-RUN echo 'export GITIAN_HOST_IP=10.0.3.2' >> .bash_profile
-RUN echo 'export LXC_GUEST_IP=10.0.3.5' >> .bash_profile
+ADD bash_profile /home/debian/.bash_profile
 
 ## script used to build base VMs
 ADD build-base-vms.sh /home/debian/
 
 RUN git clone https://github.com/devrandom/gitian-builder.git --depth=1
-RUN chown -R debian.debian . && chown -R apt-cacher-ng.apt-cacher-ng /var/cache/apt-cacher-ng/
+RUN chown -R debian.debian .bash_profile . && chown -R apt-cacher-ng.apt-cacher-ng /var/cache/apt-cacher-ng/
 
 ## suggested: run this image with mounted volumes for pre-downloaded inputs and apt-cacher-ng cache
 ## -v inputs:/home/debian/gitian-builder/inputs -v apt-cacher-ng:/var/cache/apt-cacher-ng

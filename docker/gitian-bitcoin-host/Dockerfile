@@ -11,11 +11,10 @@ RUN apt-get install -y parallel patch
 
 ADD gitian.patch /home/debian/
 
-WORKDIR /home/debian
-
 ## patch to allow paralle creation of VMs
-RUN cd gitian-builder && patch -p1 < ../gitian.patch
+RUN cd /home/debian/gitian-builder && patch -p1 < ../gitian.patch
 
+ADD input-sources/ /home/debian/input-sources/
 ADD build-bitcoin.sh /home/debian/
 ADD sign.sh /home/debian/
 
