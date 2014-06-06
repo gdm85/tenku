@@ -42,7 +42,7 @@ fi
 for SUBSYS in $(cut -d: -f2 /proc/1/cgroup)
 do
         [ -d $CGROUP/$SUBSYS ] || mkdir $CGROUP/$SUBSYS
-        mountpoint -q $CGROUP/$SUBSYS || 
+        mountpoint -q $CGROUP/$SUBSYS ||
                 mount -n -t cgroup -o $SUBSYS cgroup $CGROUP/$SUBSYS
 
         # The two following sections address a bug which manifests itself
@@ -108,6 +108,12 @@ ifconfig br0 ${GITIAN_HOST_IP}/16 up || exit $?
 umount /dev/shm
 rmdir /dev/shm
 ln -s /run/shm /dev/shm
+
+##NOTE: this is setup here instead of Dockerfile because of a Docker glitch
+cp /root/authorized_keys /home/debian/.ssh/ && \
+rm /root/authorized_keys && \
+chmod -R go-rwx /home/debian/.ssh &&
+chown -R debian.debian /home/debian/.ssh || exit $?
 
 ## test that debian user has access to its own .ssh (yes, Docker glitches crawling...)
 su -c 'cat /home/debian/.ssh/authorized_keys' -l -- debian || exit $?
