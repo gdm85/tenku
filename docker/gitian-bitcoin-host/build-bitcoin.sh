@@ -21,7 +21,10 @@ while read -r URL FNAME; do
 		continue
 	fi
 	wget --no-check-certificate "$URL" -O "$FNAME" || exit $?
-done < ../input-sources/${VERSION}.txt || exit $?
+done < ../../input-sources/${VERSION}.txt || exit $?
+
+## verify that all sources are correct before continuing
+md5sum -c < ../../input-sources/${VERSION}.txt.md5 || exit $?
 
 cd ..
 ./bin/gbuild ../bitcoin/contrib/gitian-descriptors/boost-linux.yml || exit $?
