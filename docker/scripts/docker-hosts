@@ -1,0 +1,21 @@
+#!/bin/bash
+## docker-hosts
+##
+## @author gdm85
+## script to show docker containers and their hostnames/IPv4
+#
+
+function enumerate_container_ips() {
+	local CID
+
+	for CID in $(docker ps -q -a); do
+		local NAME=$(docker inspect --format '{{ .Name }}' $CID | awk '{ print substr($0, 2, length($0)-1) }')
+		local HPATH=$(docker inspect --format '{{ .HostnamePath }}' $CID)
+		local IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID)
+		local HOSTNAME=$(<$HPATH)
+
+		echo -e "$NAME\t$HOSTNAME\t$IP"
+	done
+}
+
+enumerate_container_ips
