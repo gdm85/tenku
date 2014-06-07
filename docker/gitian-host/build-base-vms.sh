@@ -23,10 +23,12 @@ function ext_partition() {
  	loop=`sudo kpartx -av $OUT.raw|sed -n '/loop.p1/{s/.*loop\(.\)p1.*/\1/;p}'`
 	sudo cp --sparse=always /dev/mapper/loop${loop}p1 $OUT
 	sudo chown $USER $OUT
+	## following 2 lines are a sloppy hack to an unknown problem with kpartx
 	sudo sync
 	sleep 5
+	## these are silenced because if former fails, second doesn't and viceversa
 	sudo kpartx -d /dev/loop$loop 2>/dev/null
-	sudo rm /dev/mapper/loop${loop}p1
+	sudo rm /dev/mapper/loop${loop}p1 2>/dev/null
 	rm -f $OUT.raw
 }
 
