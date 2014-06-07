@@ -7,7 +7,9 @@ fi
 
 VERSION="$1"
 
-git clone https://github.com/bitcoin/bitcoin.git && \
+if [ ! -d bitcoin ]; then
+	git clone https://github.com/bitcoin/bitcoin.git || exit $?
+fi
 cd bitcoin && \
 git checkout v${VERSION} || exit $?
 
@@ -20,7 +22,7 @@ while read -r URL FNAME; do
 	if [ -z "$URL" ]; then
 		continue
 	fi
-	wget --no-check-certificate "$URL" -O "$FNAME" || exit $?
+	wget --continue --no-check-certificate "$URL" -O "$FNAME" || exit $?
 done < ../../input-sources/${VERSION}.txt || exit $?
 
 ## verify that all sources are correct before continuing

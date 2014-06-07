@@ -19,6 +19,26 @@ if [ ! -f authorized_keys ]; then
 	fi
 fi
 
+function wait_for_ssh() {
+	local IP="$1"
+	local SECS="$2"
+	while [ $SECS -gt 0 ]; do
+		ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP ls >/dev/null 2>/dev/null && return 0
+		sleep 1
+		let SECS-=1
+	done
+	return 1
+}
+
+##NOTE: can leave behind a running container of gitian-host
 docker build --tag=gdm85/gitian-host . && \
-echo "Gitian host image created successfully!" && \
+CID=$(docker run -d --privileged gdm85/gitian-host) && \
+echo "Now building base VMs" && \
+IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID) && \
+wait_for_ssh $IP 10 && \
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP ./build-base-vms.sh && \
+docker stop $CID && \
+docker commit $CID gdm85/gitian-host-vms && \
+docker rm $CID && \
+echo "Gitian host images created successfully!" && \
 echo "You can now spawn containers with spawn-gitian-host.sh"
