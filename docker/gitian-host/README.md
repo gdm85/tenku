@@ -14,11 +14,16 @@ Preamble
 It is **necessary** that before you using these scripts you read them and understand what they do.
 Why? Because your goal is to create a gitian build (deterministic) that has not been tampered with, thus trust shall be correctly attributed during your process.
 
+For example, in this repository I provide the [Debian Archive keyring](../keyrings/debian-archive-keyring.gpg) that is used for the original debootstrap,
+however you **must** verify its authenticity and that it is exactly [as provided officially by Debian](https://packages.debian.org/wheezy/all/debian-archive-keyring/download)
+in order to continue using a trusted chain of systems.
+
 See also:
 - https://gitian.org/
 - https://en.wikipedia.org/wiki/Web_of_trust
 - http://www.dwheeler.com/trusting-trust/
 - https://www.debian.org/
+- https://wiki.debian.org/SecureApt
 - https://www.docker.io/
 - http://www.ubuntu.com/
 
