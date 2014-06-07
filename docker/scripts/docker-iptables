@@ -10,7 +10,7 @@
 function replace_iptables() {
         local CID
 
-        local SEDCMD=""
+	local SEDCMD="-e s!172.17.42.1/32!dockerHost!g
         for CID in $(docker ps -q -a); do
                 local NAME=$(docker inspect --format '{{ .Name }}' $CID | awk '{ print substr($0, 2, length($0)-1) }')
                 local IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID)
