@@ -7,7 +7,7 @@ FROM gdm85/gitian-host
 
 MAINTAINER Giuseppe Mazzotta "gdm85@users.noreply.github.com"
 
-RUN apt-get install -y parallel patch
+RUN apt-get install -y patch
 
 ADD gitian.patch /home/debian/
 

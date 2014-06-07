@@ -25,7 +25,7 @@ RUN dpkg-reconfigure locales && dpkg-reconfigure tzdata
 
 ## continue installation of gitian-builder packages
 RUN echo "deb http://http.debian.net/debian wheezy main contrib non-free" > /etc/apt/sources.list.d/non-free.list
-RUN apt-get install -y iptables ca-certificates sudo bridge-utils git python-cheetah qemu-utils parted kpartx ruby apt-cacher-ng lxc
+RUN apt-get install -y iptables ca-certificates sudo bridge-utils git python-cheetah qemu-utils parted kpartx ruby apt-cacher-ng lxc parallel
 
 ## disable password logins, reverse DNS lookups & privilege separation (due to chroot issues on latest docker)
 RUN sed -i -e 's/^#PasswordAuthentication yes/PasswordAuthentication no/' -e 's/^UsePrivilegeSeparation.*$/UsePrivilegeSeparation no/' /etc/ssh/sshd_config && echo 'UseDNS no' >> /etc/ssh/sshd_config

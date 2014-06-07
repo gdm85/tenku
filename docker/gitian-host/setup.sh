@@ -110,10 +110,13 @@ rmdir /dev/shm
 ln -s /run/shm /dev/shm
 
 ##NOTE: this is setup here instead of Dockerfile because of a Docker glitch
-cp /root/authorized_keys /home/debian/.ssh/ && \
-rm /root/authorized_keys && \
-chmod -R go-rwx /home/debian/.ssh &&
-chown -R debian.debian /home/debian/.ssh || exit $?
+AK=/root/authorized_keys
+if [ -s $AK ]; then
+	cp $AK /home/debian/.ssh/ && \
+	rm $AK && \
+	chmod -R go-rwx /home/debian/.ssh &&
+	chown -R debian.debian /home/debian/.ssh || exit $?
+fi
 
 ## test that debian user has access to its own .ssh (yes, Docker glitches crawling...)
 su -c 'cat /home/debian/.ssh/authorized_keys' -l -- debian || exit $?

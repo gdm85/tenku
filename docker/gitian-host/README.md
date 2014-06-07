@@ -1,41 +1,51 @@
 Gitian host docker container
 ============================
 
-This image contains a [Dockerfile](http://docs.docker.io/reference/builder/) to generate a [gitian-builder](https://gitian.org/) host image, that can subsequently be used for reproducible builds using LXC VMs.
+The provided [Dockerfile](http://docs.docker.io/reference/builder/) allows to generate a [gitian-builder](https://gitian.org/) host image, that can subsequently be used for reproducible builds using LXC VMs.
 
 How this works:
 <img src="diagram.png">
 
-See also https://github.com/devrandom/gitian-builder/issues/53
+Some of the discussions leading to the creation of this set of Dockerfiles/scripts are available on [this issue](https://github.com/devrandom/gitian-builder/issues/53).
+
+Preamble
+--------
+
+It is **necessary** that before you using these scripts you read them and understand what they do.
+Why? Because your goal is to create a gitian build (deterministic) that has not been tampered with, thus trust shall be correctly attributed during your process.
+
+See also:
+- https://gitian.org/
+- https://en.wikipedia.org/wiki/Web_of_trust
+- http://www.dwheeler.com/trusting-trust/
+- https://www.debian.org/
+- https://www.docker.io/
+- http://www.ubuntu.com/
 
 How to build the image
 ----------------------
-I have not yet pushed images to the [Docker Registry](https://index.docker.io/), but it is a non-issue because you are supposed to create your images from scratch.
-
-First run **scripts/build-wheezy.sh** to get a Debian Wheezy image debootstrapped from Debian repositories.
+Images have not been pushed images to my [Docker Registry](https://index.docker.io/) account, this is on purpose because even if generated images have my repository prefix ('gdm85/') you are supposed
+to create them from scratch.
 
 **NOTE:** you must have debootstrap on your real host to run this script successfully, and also make sure you have a keyring with APT keys, see also https://wiki.debian.org/SecureApt
 
-At this point run **scripts/create-gitian-host.sh**, this will simply build the Dockerfile that installs the few necessary dependencies inside the prepared image.
+First steps:
+- run **scripts/build-wheezy.sh** to get a Debian Wheezy image debootstrapped from Debian repositories.
+- run **scripts/create-gitian-host.sh**, this will simply build the Dockerfile that installs the few necessary dependencies inside the prepared image, plus generate a second image with the i386 and amd64 VMs (see [build-base-vms.sh](build-base-vms.sh)).
 
-Afterwards you can spawn a gitian-host container as follows:
+**NOTE:** when I say "run", what I really mean is "read the script, study it for your own learning purposes, then run it" ;)
 
+After steps above you will have prepared a full gitian builder environment for deterministic builds.
+The image that contains the VMs is called *gdm85/gitian-host-vms*; in future you can spawn containers with this image for new gitian-builder environments.
+
+Example:
 ```
 $ scripts/spawn-gitian-host.sh
 You can now SSH into container 8a955ff5607b62d4c295745f27bbc38f2e8e011ea93053e641617d50ad2aa5a2:
 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@172.17.0.2
 $ 
 ```
-
-**NOTE:** when I say "run", what I really mean is "read the script, study it for your own learning purposes, then run it" ;)
-
-This will create a privileged container that you can access with the SSH command displayed.
-
-First step
-----------
-
-As first step it is reccomended to run the script ./build-base-vms.sh; this will take a while to create the 2 VMs.
-Once done, you have prepared a gitian builder environment for deterministic builds. You might want to stop the container and create an image to store away so that in future you can fork from there for new gitian-builder containers.
+This will create a privileged running container that you can access with the SSH command displayed.
 
 Derived images
 --------------
