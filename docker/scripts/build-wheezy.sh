@@ -1,6 +1,5 @@
 #!/bin/bash
 ## @author gdm85
-## original article: http://learndocker.com/how-to-build-a-debian-wheezy-base-container/
 ##
 ## build a base Debian Wheezy
 #
