@@ -37,7 +37,8 @@ echo "Now building base VMs" && \
 IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID) && \
 wait_for_ssh $IP 10 && \
 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP ./build-base-vms.sh && \
-docker kill $CID && \
+docker stop $CID && \
+docker wait $CID && \
 docker commit $CID gdm85/gitian-host-vms && \
 docker rm $CID && \
 echo "Gitian host images created successfully!" && \

@@ -1,9 +1,22 @@
+diff --git a/bin/gbuild b/bin/gbuild
+index 4e7839f..d1601d3 100755
+--- a/bin/gbuild
++++ b/bin/gbuild
+@@ -94,6 +94,8 @@ def build_one_configuration(suite, arch, build_desc, reference_datetime)
+   File.open("var/build-script", "w") do |script|
+     script.puts "#!/bin/bash"
+     script.puts "set -e"
++    script.puts "export LANG='en_US.UTF-8'"
++    script.puts "export LC_ALL='en_US.UTF-8'"
+     script.puts "export OUTDIR=$HOME/out"
+     script.puts "GBUILD_BITS=#{bits}"
+     script.puts "MAKEOPTS=(-j#{@options[:num_procs]})"
 diff --git a/bin/make-base-vm b/bin/make-base-vm
 index c1920f3..8a44f13 100755
 --- a/bin/make-base-vm
 +++ b/bin/make-base-vm
 @@ -109,16 +109,3 @@ rm -rf $OUT
- sudo vmbuilder kvm ubuntu --rootsize 10240 --arch=$ARCH --suite=$SUITE --addpkg=$addpkg --removepkg=$removepkg --ssh-key=var/id_dsa.pub --ssh-user-key=var/id_dsa.pub --mirror=$MIRROR --secu
+ sudo vmbuilder kvm ubuntu --rootsize 10240 --arch=$ARCH --suite=$SUITE --addpkg=$addpkg --removepkg=$removepkg --ssh-key=var/id_dsa.pub --ssh-user-key=var
  mv $OUT/*.qcow2 $OUT.qcow2
  rm -rf $OUT
 -
