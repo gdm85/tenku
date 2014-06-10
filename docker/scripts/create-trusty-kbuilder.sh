@@ -7,7 +7,7 @@ cd $BASENAME/../trusty-kbuilder || exit $?
 if [ ! -f authorized_keys ]; then
 	echo "No authorized_keys file found in $PWD"
 	if [ -f ~/.ssh/id_rsa.pub ]; then
-		echo "Do you want to use ~/.ssh/id_rsa.pub? (y/n)"
+		echo -n "Do you want to use ~/.ssh/id_rsa.pub? (y/n) "
 		read -r ANSWER
 		if [[ "$ANSWER" == "y" ]]; then
 			cp -v ~/.ssh/id_rsa.pub authorized_keys || exit $?
