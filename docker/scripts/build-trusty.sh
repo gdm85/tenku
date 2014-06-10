@@ -7,7 +7,6 @@
 BASENAME=$(dirname $(readlink -m $0))
 
 ## the distro we are going to use
-## the distro we are going to use
 DISTNAME=trusty
 REPOSRC=http://archive.ubuntu.com/ubuntu/
 
