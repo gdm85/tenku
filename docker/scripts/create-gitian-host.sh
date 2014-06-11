@@ -39,8 +39,8 @@ wait_for_ssh $IP 10 && \
 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP ./build-base-vms.sh && \
 docker kill $CID && \
 docker wait $CID && \
-sleep 3 && \
 docker commit $CID gdm85/gitian-host-vms && \
+sleep 3 && \
 docker rm $CID && \
 echo "Gitian host images created successfully!" && \
 echo "You can now spawn containers with spawn-gitian-host.sh"

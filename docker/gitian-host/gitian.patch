@@ -1,5 +1,5 @@
 diff --git a/bin/make-base-vm b/bin/make-base-vm
-index c1920f3..db311dd 100755
+index c1920f3..a5935fb 100755
 --- a/bin/make-base-vm
 +++ b/bin/make-base-vm
 @@ -106,19 +106,6 @@ fi
@@ -7,7 +7,7 @@ index c1920f3..db311dd 100755
  libexec/config-bootstrap-fixup
  rm -rf $OUT
 -sudo vmbuilder kvm ubuntu --rootsize 10240 --arch=$ARCH --suite=$SUITE --addpkg=$addpkg --removepkg=$removepkg --ssh-key=var/id_dsa.pub --ssh-user-key=var/id_dsa.pub --mirror=$MIRROR --security-mirror=$SECURITY_MIRROR --dest=$OUT --flavour=$FLAVOUR --firstboot=`pwd`/target-bin/bootstrap-fixup
-+env -i LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 sudo vmbuilder kvm ubuntu --rootsize 10240 --arch=$ARCH --suite=$SUITE --addpkg=$addpkg --removepkg=$removepkg --ssh-key=var/id_dsa.pub --ssh-user-key=var/id_dsa.pub --mirror=$MIRROR --security-m
++env -i LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 sudo vmbuilder kvm ubuntu --rootsize 10240 --arch=$ARCH --suite=$SUITE --addpkg=$addpkg --removepkg=$removepkg --ssh-key=var/id_dsa.pub --ssh-user-key=var/id_dsa.pub --mirror=$MIRROR --security-mirror=$SECURITY_MIRROR --dest=$OUT --flavour=$FLAVOUR --firstboot=`pwd`/target-bin/bootstrap-fixup
  mv $OUT/*.qcow2 $OUT.qcow2
  rm -rf $OUT
 -
