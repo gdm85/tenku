@@ -33,10 +33,10 @@ done < ../../input-sources/${VERSION}.txt | parallel -j10 || exit $?
 ## verify that all sources are correct before continuing
 md5sum -c < ../../input-sources/${VERSION}.txt.md5 && \
 cd .. && \
-./bin/gbuild ../bitcoin/contrib/gitian-descriptors/boost-linux.yml && \
-mv build/out/boost-*.zip inputs/ && \
-./bin/gbuild ../bitcoin/contrib/gitian-descriptors/deps-linux.yml && \
-mv build/out/bitcoin-deps-*.zip inputs/ && \
+for DESC in $(<../../input-sources/${VERSION}-descriptors.txt); do
+	./bin/gbuild ../bitcoin/contrib/gitian-descriptors/${DESC}.yml && \
+	mv build/out/*.zip inputs/ || exit $?
+done && \
 ./bin/gbuild --commit bitcoin=v${VERSION} ../bitcoin/contrib/gitian-descriptors/gitian-linux.yml && \
 echo "Completed successfully." && \
 echo "The output files are in: gitian-builder/build/out/"
