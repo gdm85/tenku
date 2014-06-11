@@ -27,7 +27,9 @@ while read -r URL FNAME; do
 	if [ -z "$URL" ]; then
 		continue
 	fi
-	echo "wget -q --continue --no-check-certificate '$URL' -O '$FNAME'"
+	## always remove destination. This is because we can't use --continue with SourceForge for example (infinite redirects)
+	rm "$FNAME" || exit $?
+	echo "wget -q --no-check-certificate '$URL' -O '$FNAME'"
 done < ../../input-sources/${VERSION}-inputs.txt | parallel -j10 || exit $?
 
 ## verify that all sources are correct before continuing
@@ -35,7 +37,7 @@ md5sum -c < ../../input-sources/${VERSION}-inputs.md5 && \
 cd .. && \
 for DESC in $(<../input-sources/${VERSION}-descriptors.txt); do
 	./bin/gbuild ../bitcoin/contrib/gitian-descriptors/${DESC}.yml && \
-	mv build/out/*.zip inputs/ || exit $?
+	mv -v $(find build/out -type f -name '*gz' -o -name '*.zip') inputs/ || exit $?
 done && \
 ./bin/gbuild --commit bitcoin=v${VERSION} ../bitcoin/contrib/gitian-descriptors/gitian-linux.yml && \
 echo "Completed successfully." && \
