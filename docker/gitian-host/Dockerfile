@@ -25,7 +25,7 @@ RUN dpkg-reconfigure locales && dpkg-reconfigure tzdata
 
 ## continue installation of gitian-builder packages
 RUN echo "deb http://http.debian.net/debian wheezy main contrib non-free" > /etc/apt/sources.list.d/non-free.list
-RUN apt-get install -y iptables ca-certificates sudo bridge-utils git python-cheetah qemu-utils parted kpartx ruby apt-cacher-ng lxc parallel
+RUN apt-get install -y iptables ca-certificates sudo bridge-utils git python-cheetah qemu-utils parted kpartx ruby apt-cacher-ng lxc parallel patch
 
 ## disable password logins, reverse DNS lookups & privilege separation (due to chroot issues on latest docker)
 RUN sed -i -e 's/^#PasswordAuthentication yes/PasswordAuthentication no/' -e 's/^UsePrivilegeSeparation.*$/UsePrivilegeSeparation no/' /etc/ssh/sshd_config && echo 'UseDNS no' >> /etc/ssh/sshd_config
@@ -57,6 +57,11 @@ ADD bash_profile /home/debian/.bash_profile
 ADD build-base-vms.sh /home/debian/
 
 RUN git clone https://github.com/devrandom/gitian-builder.git --depth=1
+
+ADD gitian.patch /home/debian/
+
+## patch to allow paralle creation of VMs
+RUN cd gitian-builder && patch -p1 < ../gitian.patch
 RUN chown -R debian.debian .bash_profile . && chown -R apt-cacher-ng.apt-cacher-ng /var/cache/apt-cacher-ng/
 
 ## suggested: run this image with mounted volumes for pre-downloaded inputs and apt-cacher-ng cache

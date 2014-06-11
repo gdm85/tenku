@@ -28,12 +28,12 @@ while read -r URL FNAME; do
 		continue
 	fi
 	echo "wget -q --continue --no-check-certificate '$URL' -O '$FNAME'"
-done < ../../input-sources/${VERSION}.txt | parallel -j10 || exit $?
+done < ../../input-sources/${VERSION}-inputs.txt | parallel -j10 || exit $?
 
 ## verify that all sources are correct before continuing
-md5sum -c < ../../input-sources/${VERSION}.txt.md5 && \
+md5sum -c < ../../input-sources/${VERSION}-inputs.md5 && \
 cd .. && \
-for DESC in $(<../../input-sources/${VERSION}-descriptors.txt); do
+for DESC in $(<../input-sources/${VERSION}-descriptors.txt); do
 	./bin/gbuild ../bitcoin/contrib/gitian-descriptors/${DESC}.yml && \
 	mv build/out/*.zip inputs/ || exit $?
 done && \
