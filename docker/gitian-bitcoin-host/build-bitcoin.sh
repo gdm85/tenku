@@ -28,7 +28,7 @@ while read -r URL FNAME; do
 		continue
 	fi
 	## always remove destination. This is because we can't use --continue with SourceForge for example (infinite redirects)
-	rm "$FNAME" || exit $?
+	rm -f "$FNAME" || exit $?
 	echo "wget -q --no-check-certificate '$URL' -O '$FNAME'"
 done < ../../input-sources/${VERSION}-inputs.txt | parallel -j10 || exit $?
 

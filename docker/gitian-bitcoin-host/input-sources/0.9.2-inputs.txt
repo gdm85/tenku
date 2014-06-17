@@ -1,0 +1,11 @@
+http://miniupnp.free.fr/files/download.php?file=miniupnpc-1.9.tar.gz    miniupnpc-1.9.tar.gz                                                                                                  
+https://www.openssl.org/source/openssl-1.0.1h.tar.gz    openssl-1.0.1h.tar.gz
+http://download.oracle.com/berkeley-db/db-4.8.30.NC.tar.gz      db-4.8.30.NC.tar.gz
+http://zlib.net/zlib-1.2.8.tar.gz       zlib-1.2.8.tar.gz
+https://fukuchi.org/works/qrencode/qrencode-3.4.3.tar.bz2       qrencode-3.4.3.tar.bz2
+https://downloads.sourceforge.net/project/boost/boost/1.55.0/boost_1_55_0.tar.bz2       boost_1_55_0.tar.bz2
+https://download.qt-project.org/official_releases/qt/5.2/5.2.0/single/qt-everywhere-opensource-src-5.2.0.tar.gz qt-everywhere-opensource-src-5.2.0.tar.gz
+https://download.qt-project.org/archive/qt/4.6/qt-everywhere-opensource-src-4.6.4.tar.gz        qt-everywhere-opensource-src-4.6.4.tar.gz
+https://protobuf.googlecode.com/files/protobuf-2.5.0.tar.bz2    protobuf-2.5.0.tar.bz2
+http://cdrkit.org/releases/cdrkit-1.1.11.tar.gz cdrkit-1.1.11.tar.gz
+http://llvm.org/releases/3.2/clang+llvm-3.2-x86-linux-ubuntu-12.04.tar.gz     clang-llvm-3.2-x86-linux-ubuntu-12.04.tar.gz

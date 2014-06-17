@@ -30,6 +30,13 @@ function wait_for_ssh() {
 	return 1
 }
 
+function wait_remove() {
+	local CID="$1"
+	while [ ! docker rm $CID 2>/dev/null ]; do
+		sleep 2
+	done
+}
+
 ##NOTE: can leave behind a running container of gitian-host
 docker build --tag=gdm85/gitian-host . && \
 CID=$(docker run -d --privileged gdm85/gitian-host) && \
@@ -40,7 +47,6 @@ ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP ./bui
 docker kill $CID && \
 docker wait $CID && \
 docker commit $CID gdm85/gitian-host-vms && \
-sleep 3 && \
-docker rm $CID && \
+sleep 3 && wait_remove $CID && \
 echo "Gitian host images created successfully!" && \
 echo "You can now spawn containers with spawn-gitian-host.sh"
