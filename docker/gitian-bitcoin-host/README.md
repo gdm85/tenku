@@ -6,10 +6,10 @@ Before proceeding make sure you have created the necessary *gdm85/wheezy*, *gdm8
 
 Afterwards you can create the *gdm85/gitian-bitcoin-host* image by running [scripts/create-gitian-bitcoin-host.sh](../scripts/create-gitian-bitcoin-host.sh).
 
-NOTE: this image currently supports only building of bitcoin 0.9.1, but it can be easily adapted to build other versions.
+**NOTE:** this image currently supports only building of bitcoin 0.9.1, but it can be easily adapted to build other versions.
 You can submit the source lists for other versions as a patch or pull request, see directory [input-sources/](input-sources/) for currently available versions.
 
-Do not forget to read also the [Preamble here](../gitian-host/README.md#preamble] to correctly use Gitian builder and these provided scripts.
+Do not forget to read also the [Preamble here](../gitian-host/README.md#preamble) to correctly use Gitian builder and these provided scripts.
 
 Spawning a container
 --------------------
@@ -48,7 +48,7 @@ Only the out_manifest signatures do matter for this purpose.
 In order to sign you have to either put your private key in the container's *~/.gnupg* or perform the signing externally, at your option.
 
 If you have the private key in the container (also displayed by `gpg -K`), then you can use the [sign.sh](sign.sh) script that is already provided, otherwise
-run it (with failure) and then copy the *~/gitian.sigs~ directory to another machine to apply the GPG signature.
+run it (with failure) and then copy the *~/gitian.sigs* directory to another machine to apply the GPG signature.
 
 Submitting your signature
 -------------------------
