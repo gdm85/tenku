@@ -54,7 +54,7 @@ This will create a privileged running container that you can access with the SSH
 
 Derived images
 --------------
-A [bitcoin gitian host container](../gitian-bitcoin/host/README.md) is available.
+A [bitcoin gitian host container](../gitian-bitcoin-host/README.md) is available.
 
 Credits
 -------
