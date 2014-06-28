@@ -11,11 +11,10 @@ Some of the discussions leading to the creation of this set of Dockerfiles/scrip
 Preamble
 --------
 
-It is **necessary** that before you using these scripts you read them and understand what they do.
-Why? Because your goal is to create a gitian build (deterministic) that has not been tampered with, thus trust shall be correctly attributed during your process.
+It is **necessary** to read the provided scripts and understand what they do before starting to use them.
+The reason is that aiming at the goal of creating a Gitian build (deterministic) also means that your build is untampered, thus trust shall be correctly attributed during the process.
 
-For example, in this repository I provide the [Debian Archive keyring](../keyrings/debian-archive-keyring.gpg) that is used for the original debootstrap,
-however you **must** verify its authenticity and that it is exactly [as provided officially by Debian](https://packages.debian.org/wheezy/all/debian-archive-keyring/download)
+For example, in this repository I provide the [Debian Archive keyring](../keyrings/debian-archive-keyring.gpg) that is used for the original debootstrap, however you **must** verify its authenticity and that it is exactly [as provided officially by Debian](https://packages.debian.org/wheezy/all/debian-archive-keyring/download)
 in order to continue using a trusted chain of systems.
 
 See also:
@@ -29,19 +28,19 @@ See also:
 
 How to build the image
 ----------------------
-Images have not been pushed images to my [Docker Registry](https://index.docker.io/) account, this is on purpose because even if generated images have my repository prefix ('gdm85/') you are supposed
-to create them from scratch.
+Images have not been pushed to my [Docker Registry](https://index.docker.io/) account, this is on purpose because even if generated images have my repository prefix ('gdm85/') you are supposed to create them from scratch with the provided (auditable) scripts.
 
-**NOTE:** you must have debootstrap on your real host to run this script successfully, and also make sure you have a keyring with APT keys, see also https://wiki.debian.org/SecureApt
+**NOTE:** you must have *debootstrap* on your real host to run this script successfully, and also make sure you have a keyring with APT keys, see also https://wiki.debian.org/SecureApt
 
 First steps:
-- run **scripts/build-wheezy.sh** to get a Debian Wheezy image debootstrapped from Debian repositories.
-- run **scripts/create-gitian-host.sh**, this will simply build the Dockerfile that installs the few necessary dependencies inside the prepared image, plus generate a second image with the i386 and amd64 VMs (see [build-base-vms.sh](build-base-vms.sh)).
+- run [scripts/build-wheezy.sh](../scripts/build-wheezy.sh) to get a Debian Wheezy image debootstrapped from Debian repositories.
+- run [scripts/create-gitian-host.sh](../scripts/create-gitian-host.sh), this will simply build the Dockerfile that installs the few necessary dependencies inside the prepared image
+- generate a second image with the i386 and amd64 VMs byu using [build-base-vms.sh](../scripts/build-base-vms.sh)
 
-**NOTE:** when I say "run", what I really mean is "read the script, study it for your own learning purposes, then run it" ;)
+**NOTE:** when I say "run", what I really mean is "read the script, study it for your own learning purposes, then run it"
 
-After steps above you will have prepared a full gitian builder environment for deterministic builds.
-The image that contains the VMs is called *gdm85/gitian-host-vms*; in future you can spawn containers with this image for new gitian-builder environments.
+After steps above you will have prepared a full Gitian builder environment for deterministic builds.
+The image that contains the VMs is called *gdm85/gitian-host-vms*; in future you can spawn containers with this image for new Gitian builder environments.
 
 Example:
 ```
