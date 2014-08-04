@@ -1,0 +1,62 @@
+#!/bin/bash
+## docker-hosts
+##
+## @author gdm85
+## script to show docker allocated ports of a container
+#
+
+if ! type jq >/dev/null 2>/dev/null; then
+	echo "jq must be installed" 1>&2
+	exit 1
+fi
+
+if [ $# -lt 1 ]; then
+	echo "Please specify at least one container" 1>&2
+	exit 1
+fi
+
+function show_ports() {
+	local CID="$1"
+
+	local CONTAINER_IPv4=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID) || return $?
+	if [[ -z "$CONTAINER_IPv4" || "$CONTAINER_IPv4" == "<no value>" ]]; then
+		echo "Invalid container: $CID" 1>&2
+		return 1
+	fi
+
+	local NAME=$(docker inspect --format '{{ .Name }}' $CID | awk '{ print substr($0, 2, length($0)-1) }')
+
+	local STANZA="$(docker inspect --format '{{json .HostConfig.PortBindings }}' $CID)" || return $?
+
+	echo "$NAME:"
+
+	let I=0
+	for P in $(echo "$STANZA" | jq -M 'keys' | tail -n+2 | head -n-1 | sed s/,$// | sed 's/"//g' ); do
+		## port on container
+		local SRCPORT="$(echo $P | awk -F/ '{ print $1 }')"
+
+		echo -e -n "\t$SRCPORT\t<-\t"
+
+		## get port binding (if any)
+		local SNIP=$(echo $STANZA | jq -M "to_entries | .[$I].value")
+
+		if [[ -z "$SNIP" || "$SNIP" == "null" ]]; then
+			echo "$CONTAINER_IPv4:$SRCPORT"
+		else
+			local HOSTIP="$(echo $SNIP | jq -M -r '.[0].HostIp')"
+
+			## match only bindings on dockerhost
+			if [[ -z "$HOSTIP" || "$HOSTIP" == '0.0.0.0' ]]; then
+				local HOSTPORT="$(echo $SNIP | jq -M -r '.[0].HostPort')"
+				echo "0.0.0.0:$HOSTPORT"
+			else
+				echo "$HOSTIP:$SRCPORT"
+			fi
+		fi
+		let I=I+1
+	done
+}
+
+for CID in $@; do
+	show_ports "$CID"
+done
