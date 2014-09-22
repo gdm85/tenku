@@ -13,7 +13,9 @@ export MIRROR_HOST=$GITIAN_HOST_IP
 SUITE=precise
 
 ## build both VMs in parallel
-echo -e "MIRROR_HOST=$GITIAN_HOST_IP bin/make-base-vm --lxc --arch i386 --suite $SUITE\nMIRROR_HOST=$GITIAN_HOST_IP bin/make-base-vm --lxc --arch amd64 --suite $SUITE" | parallel -j2 || exit $?
+echo "Now building i386 and amd64 VMs..."
+echo -e "MIRROR_HOST=$GITIAN_HOST_IP bin/make-base-vm --lxc --arch i386 --suite $SUITE\nMIRROR_HOST=$GITIAN_HOST_IP bin/make-base-vm --lxc --arch amd64 --suite $SUITE" \
+	| parallel -j2 || exit $?
 
 function ext_partition() {
 	local OUT=$1

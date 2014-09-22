@@ -24,12 +24,13 @@ mkdir -p inputs && cd inputs/ || exit $?
 ## get each dependency
 ## they are validated afterwards by gbuild
 while read -r URL FNAME; do
-	if [ -z "$URL" ]; then
-		continue
-	fi
-	## always remove destination. This is because we can't use --continue with SourceForge for example (infinite redirects)
-	rm -f "$FNAME" || exit $?
-	echo "wget -q --no-check-certificate '$URL' -O '$FNAME'"
+        if [ -z "$URL" ]; then
+                continue
+        fi
+        if [ ! -f $FNAME ]; then
+                echo "echo 'Downloading $FNAME'"
+                echo "wget -q --no-check-certificate '$URL' -O '$FNAME' || echo 'Failed to download $FNAME from $URL'"
+        fi
 done < ../../input-sources/${VERSION}-inputs.txt | parallel -j10 || exit $?
 
 ## verify that all sources are correct before continuing

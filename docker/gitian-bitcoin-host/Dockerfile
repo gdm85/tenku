@@ -7,9 +7,9 @@ FROM gdm85/gitian-host-vms
 
 MAINTAINER Giuseppe Mazzotta "gdm85@users.noreply.github.com"
 
-ADD input-sources/ /home/debian/input-sources/
-ADD build-bitcoin.sh /home/debian/
-ADD sign.sh /home/debian/
+COPY input-sources/ /home/debian/input-sources/
+COPY bin/build-bitcoin.sh /home/debian/
+COPY bin/sign.sh /home/debian/
 
 WORKDIR /home/debian
 
