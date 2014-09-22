@@ -32,11 +32,11 @@ Preparing the gitian environment
 
 To initiate a gitian build of bitcoin you will run:
 
-- [./build-bitcoin.sh](build-bitcoin.sh) 0.9.3
+- [./build-bitcoin.sh](bin/build-bitcoin.sh) 0.9.3
 
 Notice the parameter 0.9.3, that is the version we are going to build and must be available in [input-sources](input-sources/).
 
-[build-bitcoin.sh](build-bitcoin.sh) is a script that will download & build all the dependencies and then bitcoin itself, for both i386 and amd64 Linux architectures.
+[build-bitcoin.sh](bin/build-bitcoin.sh) is a script that will download & build all the dependencies and then bitcoin itself, for both i386 and amd64 Linux architectures.
 
 Signing
 -------
