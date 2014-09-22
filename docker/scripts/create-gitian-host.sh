@@ -20,14 +20,14 @@ if [ ! -f authorized_keys ]; then
 fi
 
 function wait_for_ssh() {
-	local IP="$1"
-	local SECS="$2"
-	while [ $SECS -gt 0 ]; do
-		ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP ls >/dev/null 2>/dev/null && return 0
-		sleep 1
-		let SECS-=1
-	done
-	return 1
+       local IP="$1"
+       local SECS="$2"
+       while [ $SECS -gt 0 ]; do
+               ssh -o ConnectTimeout=1 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP ls >/dev/null 2>/dev/null && return 0
+               sleep 1
+               let SECS-=1
+       done
+       return 1
 }
 
 function wait_remove() {
@@ -40,13 +40,13 @@ function wait_remove() {
 ##NOTE: can leave behind a running container of gitian-host
 docker build --tag=gdm85/gitian-host . && \
 CID=$(docker run -d --privileged gdm85/gitian-host) && \
-echo "Now building base VMs" && \
 IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID) && \
-wait_for_ssh $IP 10 && \
+wait_for_ssh "$IP" 10 && \
+echo "$CID is now online ($IP), building base VMs on it" && \
 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP ./build-base-vms.sh && \
 docker kill $CID && \
 docker wait $CID && \
 docker commit $CID gdm85/gitian-host-vms && \
-sleep 3 && wait_remove $CID && \
+wait_remove $CID && \
 echo "Gitian host images created successfully!" && \
 echo "You can now spawn containers with spawn-gitian-host.sh"

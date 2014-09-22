@@ -19,8 +19,8 @@ ENV     DEBIAN_FRONTEND noninteractive
 RUN apt-get update && apt-get install -y htop tmux less locales openssh-server
 
 ## these 2 files can be customized
-ADD etc/timezone /etc/timezone
-ADD etc/locale.gen /etc/locale.gen
+COPY etc/timezone /etc/
+COPY etc/locale.gen /etc/
 RUN dpkg-reconfigure locales && dpkg-reconfigure tzdata
 
 ## continue installation of gitian-builder packages
@@ -42,7 +42,7 @@ RUN useradd -m -s /bin/bash debian && adduser debian sudo && mkdir /home/debian/
 ## provide authorized keys to allow connections inside host
 ## NOTE: this is placed in debian user directory by setup.sh script
 ## reason is that there is a Docker glitch with file permissions when adding this
-ADD authorized_keys /root/
+COPY authorized_keys /root/
 
 WORKDIR /home/debian
 
@@ -51,17 +51,17 @@ RUN wget http://archive.ubuntu.com/ubuntu/pool/universe/v/vm-builder/vm-builder_
 RUN tar -zxvf vm-builder_0.12.4+bzr489.orig.tar.gz && cd vm-builder-0.12.4+bzr489 && python setup.py install
 
 ## these must always be loaded when you login as 'debian' user
-ADD bash_profile /home/debian/.bash_profile
+COPY bash_profile /home/debian/.bash_profile
 
 ## script used to build base VMs
-ADD build-base-vms.sh /home/debian/
+COPY bin/build-base-vms.sh /home/debian/
 
-RUN git clone https://github.com/devrandom/gitian-builder.git --depth=1
+RUN git clone https://github.com/devrandom/gitian-builder.git && cd gitian-builder && git checkout ffd04a46a2b3c1277937c939cdb151fcf0eac613
 
-ADD gitian.patch /home/debian/
+COPY gitian.patch /home/debian/
 
 ## patch to allow paralle creation of VMs
-RUN cd gitian-builder && patch -p1 < ../gitian.patch
+RUN cd gitian-builder && patch -p1 < ../gitian.patch && rm ../gitian.patch
 RUN chown -R debian.debian .bash_profile . && chown -R apt-cacher-ng.apt-cacher-ng /var/cache/apt-cacher-ng/
 
 ## suggested: run this image with mounted volumes for pre-downloaded inputs and apt-cacher-ng cache
@@ -69,7 +69,7 @@ RUN chown -R debian.debian .bash_profile . && chown -R apt-cacher-ng.apt-cacher-
 ##NOTE: if you do use them, then not forget to set proper user rights for these mounted volumes
 
 ## all necessary setup instructions (SSH, LXC)
-ADD setup.sh /usr/local/bin/setup.sh
+COPY bin/setup.sh /usr/local/bin/setup.sh
 
 ## on run failure, check logs to see if setup failed. on success connect via SSH
 CMD /usr/local/bin/setup.sh && /etc/init.d/apt-cacher-ng start && /usr/sbin/sshd -D -e
