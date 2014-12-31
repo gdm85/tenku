@@ -7,6 +7,8 @@ FROM gdm85/gitian-host-vms
 
 MAINTAINER Giuseppe Mazzotta "gdm85@users.noreply.github.com"
 
+RUN aptitude install make -y
+
 COPY input-sources/ /home/debian/input-sources/
 COPY bin/build-bitcoin.sh /home/debian/
 COPY bin/sign.sh /home/debian/
