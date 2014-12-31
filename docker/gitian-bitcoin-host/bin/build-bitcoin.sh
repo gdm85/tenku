@@ -62,5 +62,5 @@ fi
 
 ## proceed to build
 cd gitian-builder && \
-./bin/gbuild -u bitcoin=$CLONE $CLONE/contrib/gitian-descriptors/gitian-linux.yml && \
+./bin/gbuild --commit bitcoin=v$VERSION -u bitcoin=$CLONE $CLONE/contrib/gitian-descriptors/gitian-linux.yml && \
 echo "Build completed successfully, output files are in: ~/gitian-builder/build/out/"
