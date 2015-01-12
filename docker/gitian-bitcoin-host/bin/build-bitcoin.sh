@@ -6,12 +6,14 @@
 ##
 #
 
-if [[ ! $# -eq 1 ]]; then
-	echo "Please specify version" 1>&2
+if [ $# -lt 2 ]; then
+	echo "Usage: build-bitcoin.sh version linux [win] [osx] [...]" 1>&2
 	exit 1
 fi
 
 VERSION="$1"
+shift
+## remaining parameters are OS targets to be build (e.g. win,osx,linux)
 
 CLONE="$HOME/bitcoin"
 
@@ -30,8 +32,15 @@ if [ ! -d bitcoin ]; then
 	cd .. || exit $?
 fi
 
-## old logic using descriptors
+## old logic using descriptors (only linux supported
 if ! verlte 0.10.0rc1 ${VERSION}; then
+
+	## make sure only Linux is being built
+	if [[ ! $# -eq 1 && "$1" != "linux" ]]; then
+		echo "For versions before 0.10.0rc1, only Linux building is supported" 1>&2
+		exit 1
+	fi
+
 	cd gitian-builder/inputs || exit $?
 	## get each dependency
 	## they are validated afterwards by gbuild
@@ -55,12 +64,17 @@ if ! verlte 0.10.0rc1 ${VERSION}; then
 		mv -v $(find build/out -type f -name '*gz' -o -name '*.zip') inputs/ || exit $?
 	done
 else
-	cd bitcoin/depends && \
-	make download-linux SOURCES_PATH="$HOME/gitian-builder/cache/common" && \
+	cd bitcoin/depends || exit $?
+	for DESC in $@; do
+		make download-${DESC} SOURCES_PATH="$HOME/gitian-builder/cache/common" || exit $?
+	done
 	cd ../.. || exit $?
 fi
 
-## proceed to build
-cd gitian-builder && \
-./bin/gbuild --commit bitcoin=v$VERSION -u bitcoin=$CLONE $CLONE/contrib/gitian-descriptors/gitian-linux.yml && \
+## proceed to build of each of the specified gitian descriptors
+cd gitian-builder || exit $?
+for DESC in $@; do
+	./bin/gbuild --commit bitcoin=v$VERSION -u bitcoin=$CLONE "$CLONE/contrib/gitian-descriptors/gitian-${DESC}.yml" || exit $?
+done
+
 echo "Build completed successfully, output files are in: ~/gitian-builder/build/out/"
