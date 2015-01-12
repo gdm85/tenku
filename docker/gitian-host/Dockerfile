@@ -12,11 +12,10 @@ FROM gdm85/wheezy
 
 MAINTAINER Giuseppe Mazzotta "gdm85@users.noreply.github.com"
 
-ENV     TERM xterm
-ENV     DEBIAN_FRONTEND noninteractive
-
 ## some core packages
-RUN apt-get update && apt-get install -y htop tmux less locales openssh-server
+RUN apt-get update && apt-get install -y aptitude
+RUN aptitude update && aptitude safe-upgrade -y
+RUN aptitude install htop tmux less locales openssh-server -y
 
 ## these 2 files can be customized
 COPY etc/timezone /etc/

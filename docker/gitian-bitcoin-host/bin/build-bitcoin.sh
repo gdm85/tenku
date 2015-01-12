@@ -21,6 +21,7 @@ function verlte() {
     [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
 }
 
+NPROC=$(nproc) && \
 cd gitian-builder && \
 mkdir -p inputs && \
 cd .. || exit $?
@@ -60,7 +61,7 @@ if ! verlte 0.10.0rc1 ${VERSION}; then
 	cd .. || exit $?
 
 	for DESC in $DESCRIPTORS; do
-		./bin/gbuild ../bitcoin/contrib/gitian-descriptors/${DESC}.yml && \
+		./bin/gbuild -j$NPROC ../bitcoin/contrib/gitian-descriptors/${DESC}.yml && \
 		mv -v $(find build/out -type f -name '*gz' -o -name '*.zip') inputs/ || exit $?
 	done
 else
@@ -74,7 +75,7 @@ fi
 ## proceed to build of each of the specified gitian descriptors
 cd gitian-builder || exit $?
 for DESC in $@; do
-	./bin/gbuild --commit bitcoin=v$VERSION -u bitcoin=$CLONE "$CLONE/contrib/gitian-descriptors/gitian-${DESC}.yml" || exit $?
+	./bin/gbuild -j$NPROC --commit bitcoin=v$VERSION -u bitcoin=$CLONE "$CLONE/contrib/gitian-descriptors/gitian-${DESC}.yml" || exit $?
 done
 
 echo "Build completed successfully, output files are in: ~/gitian-builder/build/out/"

@@ -2,23 +2,6 @@
 
 BASENAME=$(dirname $(readlink -m $0))
 
-cd $BASENAME/../gitian-host || exit $?
-
-if [ ! -f authorized_keys ]; then
-	echo "No authorized_keys file found in $PWD"
-	if [ -f ~/.ssh/id_rsa.pub ]; then
-		echo -n "Do you want to use ~/.ssh/id_rsa.pub? (y/n) "
-		read -r ANSWER
-		if [[ "$ANSWER" == "y" ]]; then
-			cp -v ~/.ssh/id_rsa.pub authorized_keys || exit $?
-		else
-			exit 1
-		fi
-	else
-		exit 1
-	fi
-fi
-
 function wait_for_ssh() {
        local IP="$1"
        local SECS="$2"
@@ -37,13 +20,30 @@ function wait_remove() {
 	done
 }
 
+cd $BASENAME/../gitian-host || exit $?
+
+if [ ! -f authorized_keys ]; then
+	echo "No authorized_keys file found in $PWD"
+	if [ -f ~/.ssh/id_rsa.pub ]; then
+		echo -n "Do you want to use ~/.ssh/id_rsa.pub? (y/n) "
+		read -r ANSWER
+		if [[ "$ANSWER" == "y" ]]; then
+			cp -v ~/.ssh/id_rsa.pub authorized_keys || exit $?
+		else
+			exit 1
+		fi
+	else
+		exit 1
+	fi
+fi
+
 ##NOTE: can leave behind a running container of gitian-host
 docker build --tag=gdm85/gitian-host . && \
 CID=$(docker run -d --privileged gdm85/gitian-host) && \
 IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID) && \
 wait_for_ssh "$IP" 10 && \
 echo "$CID is now online ($IP), building base VMs on it" && \
-ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP ./build-base-vms.sh && \
+ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP bash -c 'cd /home/debian && source ./.bash_profile && ./build-base-vms.sh amd64' && \
 docker kill $CID && \
 docker wait $CID && \
 docker commit $CID gdm85/gitian-host-vms && \

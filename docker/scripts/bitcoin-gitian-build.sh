@@ -1,10 +1,24 @@
 #!/bin/bash
+## bitcoin-gitian-build.sh
+##
+## @author gdm85
+##
+## Automatically build latest version of Bitcoin Core using
+## Docker containers (LXC) + KVM.
+##
+## User can specify target operative systems as arguments.
+##
+#
+
+SCRIPTS=$(dirname $(readlink -m $0)) || exit $?
 
 if [ $# -lt 1 ]; then
 	echo "Usage: gitian-build.sh linux [win] [osx] [...]" 1>&2
 	exit 1
 fi
 
+## identify a CLI tool to run commands in parallel
+## coshell is preferred
 PARALLEL=""
 if type coshell 2>/dev/null >/dev/null; then
 	PARALLEL="coshell"
@@ -17,38 +31,21 @@ else
 	fi
 fi
 
+## retrieve latest tagged release/release candidate
 set -o pipefail && \
 MOSTRECENT="$(curl -s https://api.github.com/repos/bitcoin/bitcoin/tags | jq -r '.[0].name' | awk '{ print substr($0, 2) }')" || exit $?
 
 ## run all necessary containers, detached
+## setup proper volumes for input/output collection
 function run_all() {
 	local OS
+	local SRCV="/home/debian/gitian-build/inputs"
+	local DSTV="/home/debian/gitian-build/build/out"
 
 	for OS in "$@"; do
-		echo "docker run -d --privileged gdm85/gitian-bitcoin-host"
+		mkdir -p "$SCRIPTS/cache/${OS}-inputs" "$SCRIPTS/built/${OS}" && \
+		echo "docker run -d --privileged -v $SCRIPTS/cache/${OS}-inputs:${SRCV} -v $SCRIPTS/built/${OS}:${DSTV} gdm85/gitian-bitcoin-host" || return $?
 	done | $PARALLEL
-}
-
-## run a simple test to detect if SSH works
-function loop_wait_all() {
-	local RETRIES="$1"
-	shift
-	while [ $RETRIES -gt 0 ]; do
-		wait_all "$@" && break
-		sleep 1
-		let RETRIES-=1
-	done
-	return 0
-}
-
-function wait_all() {
-	local CID
-	local IP
-
-	for CID in "$@"; do
-		IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID) && \
-	    	echo "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP true" || return $?
-	done | $PARALLEL 2>/dev/null
 }
 
 function build_all() {
@@ -63,34 +60,23 @@ function build_all() {
 	local I=0
 	for CID in $CREATED; do
 		OS=${OSES[$I]}
-#		IP=$(docker inspect --format '{{ .NetworkSettings.IPAddress }}' $CID) && \
-#	    	echo -n "ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no debian@$IP " && \
-#		echo "./build-bitcoin.sh $MOSTRECENT ${OS}" || return $?
-		echo "docker-enter $CID su -c 'cd /home/debian && ./build-bitcoin.sh $MOSTRECENT ${OS}' debian"
+		echo "docker exec $CID su -c 'cd /home/debian && source .bash_profile && ./build-bitcoin.sh $MOSTRECENT ${OS}' debian"
 		let I+=1
 	done | $PARALLEL
 }
 
-function copy_all() {
-	local OS
-	for OS in "$@"; do
-		echo "docker cp ${CID}:/home/debian/gitian-build/build/out built-${OS}"
-	done | $PARALLEL
-}
-
 CREATED="$(run_all $@ | tr '\n' ' ')" && \
-echo loop_wait_all 5 $CREATED && \
-echo "Containers are online: $CREATED, building bitcoin v$MOSTRECENT" && \
+echo "Building bitcoin v$MOSTRECENT on containers $CREATED" && \
 build_all $CREATED $@ && \
-copy_all $CREATED
+echo "Build results are available in '$SCRIPTS/built/'"
 RV=$?
 
 ## cleanup
-#echo "Cleaning up created containers..."
-#for CID in $CREATED; do
-#	docker stop $CID
-#	docker rm $CID
-#done
+echo "Cleaning up created containers..."
+for CID in $CREATED; do
+	docker stop $CID
+	docker rm $CID
+done
 
 ## return build exit code
 exit $RV
