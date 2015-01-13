@@ -25,21 +25,39 @@ for TYPE in "$@"; do
 	echo -e "MIRROR_HOST=$GITIAN_HOST_IP bin/make-base-vm --lxc --arch $TYPE --suite $SUITE"
 done | parallel -j$# || exit $?
 
+function retry_remove() {
+	local RETRIES="$1"
+	local LOOP="$2"
+	while ! sudo losetup -d "/dev/loop${LOOP}" 2>/dev/null; do
+		let RETRIES-=1
+		if [ $RETRIES -eq 0 ]; then
+			echo "Failed removing /dev/loop${LOOP}" 1>&2
+			return 1
+		fi
+		sleep 1
+	done
+	sudo unlink /dev/mapper/loop${LOOP}p1 2>/dev/null
+}
+
 ## this function corresponds to part removed from gbuild via custom patch
 function ext_partition() {
+	local loop
 	local OUT=$1
-	echo "Extracting $OUT partition for lxc" && \
+	echo "Converting $OUT to raw format..." && \
 	qemu-img convert $OUT.qcow2 $OUT.raw && \
- 	loop=`sudo kpartx -av $OUT.raw|sed -n '/loop.p1/{s/.*loop\(.\)p1.*/\1/;p}'` || return $?
+	echo -n "Identifying partition..." && \
+	set -o pipefail && \
+ 	loop=`sudo kpartx -av $OUT.raw | sed -n '/loop.p1/{s/.*loop\(.\)p1.*/\1/;p}'` && \
+	echo ": $loop" && \
+	echo "Copying partition to $OUT..." && \
 	sudo cp --sparse=always /dev/mapper/loop${loop}p1 $OUT && \
 	sudo chown $USER $OUT || return $?
-	## following 2 lines are a sloppy hack to an unknown problem with kpartx
-	sudo sync && \
-	sleep 5 || return $?
 	## these are silenced because if former fails, second doesn't and viceversa
-	sudo kpartx -d /dev/loop$loop 2>/dev/null && \
-	sudo rm /dev/mapper/loop${loop}p1 2>/dev/null && \
-	rm -f $OUT.raw
+	echo "Removing partition loop mount..." && \
+	retry_remove 5 "$loop" && \
+	echo "Removing raw image..." && \
+	rm -f "$OUT.raw" && \
+	echo "$OUT correctly extracted"
 }
 
 for TYPE in "$@"; do

@@ -17,6 +17,11 @@ if [ $# -lt 1 ]; then
 	exit 1
 fi
 
+if docker info 2>/dev/null | grep ^Storage | grep aufs$ >/dev/null; then
+	echo "You are using AUFS as Docker storage drive, which is terribly broken and not supported by this script." 1>&2
+	exit 1
+fi
+
 ## identify a CLI tool to run commands in parallel
 ## coshell is preferred
 PARALLEL=""
@@ -35,12 +40,17 @@ fi
 set -o pipefail && \
 MOSTRECENT="$(curl -s https://api.github.com/repos/bitcoin/bitcoin/tags | jq -r '.[0].name' | awk '{ print substr($0, 2) }')" || exit $?
 
+## volumes inside container
+SRCV="/home/debian/gitian-builder/cache/common"
+DSTV="/home/debian/gitian-build/build/out"
+
 ## run all necessary containers, detached
 ## setup proper volumes for input/output collection
 function run_all() {
 	local OS
-	local SRCV="/home/debian/gitian-build/inputs"
-	local DSTV="/home/debian/gitian-build/build/out"
+
+	mkdir -p "$SCRIPTS/cache" "$SCRIPTS/built" && \
+	chown 1000.1000 "$SCRIPTS/cache" "$SCRIPTS/built" || return $?
 
 	for OS in "$@"; do
 		mkdir -p "$SCRIPTS/cache/${OS}-inputs" "$SCRIPTS/built/${OS}" && \
@@ -60,6 +70,9 @@ function build_all() {
 	local I=0
 	for CID in $CREATED; do
 		OS=${OSES[$I]}
+
+		## first, fix rights of mounted volumes
+#		echo -n "docker exec $CID chown -R debian.debian '$SRCV' '$DSTV' && " && \
 		echo "docker exec $CID su -c 'cd /home/debian && source .bash_profile && ./build-bitcoin.sh $MOSTRECENT ${OS}' debian"
 		let I+=1
 	done | $PARALLEL
