@@ -66,7 +66,7 @@ function run_all() {
 		rm -rf "$LDEST/${OS}" && \
 		mkdir -p "$LDEST/${OS}" || return $?
 	done
-	mkdir -p "$LSIGS/$USER" && \
+	mkdir -p "$LSIGS/${MOSTRECENT}/${SIGNER}" && \
 	mkdir -p "$LSOURCE" && \
 	mkdir -p "$LRESULT" && \
 	chown -R 1000.1000 "$LDEST" "$LSOURCE" "$LSIGS" "$LRESULT" || return $?
@@ -84,14 +84,15 @@ function inject_mac_sdk() {
 
 function build_all() {
 	local ALL=($@)
-	local LEN=$(($#/2))
-	local CREATED=("${ALL[@]:0:$LEN}")
-	local OSES=("${ALL[@]:$LEN}")
+	local COUNT=$#
+	local LEN=$((COUNT/2))
+	local CREATED=(${ALL[@]:0:$LEN})
+	local OSES=(${ALL[@]:$LEN})
 	local CID
 	local OS
 
 	local I=0
-	for CID in $CREATED; do
+	for CID in "${CREATED[@]}"; do
 		OS=${OSES[$I]}
 
 		if [[ "$OS" == "osx" ]]; then
@@ -101,7 +102,7 @@ function build_all() {
 	done
 
 	I=0
-	for CID in $CREATED; do
+	for CID in "${CREATED[@]}"; do
 		OS=${OSES[$I]}
 
 		## first, fix rights of mounted volumes
@@ -113,18 +114,17 @@ function build_all() {
 }
 
 CREATED="$(run_all $@ | tr '\n' ' ')" && \
-echo "Building bitcoin v$MOSTRECENT on containers $CREATED" && \
-build_all $CREATED $@ && \
+echo "Building bitcoin v$MOSTRECENT for $@" && \
+build_all ${CREATED[@]} $@ && \
 echo "Build results are available in '$SCRIPTS/built/'"
 RV=$?
-
-exit $RV
 
 ## cleanup
 echo "Cleaning up created containers..."
 for CID in $CREATED; do
-	docker stop $CID
-	docker rm $CID
+#	docker stop $CID
+#	docker rm $CID
+	docker pause $CID
 done
 
 ## return build exit code
