@@ -1,0 +1,8 @@
+--- a/bin/gasserts	2015-01-13 15:39:29.000000000 +0000
++++ b/bin/gasserts	2015-01-14 13:52:49.287255738 +0000
+@@ -85,4 +85,3 @@
+ File.open(assert_path, "w") do |io|
+   io.write result.to_yaml
+ end
+-system!("gpg --detach-sign -u \"#{signer}\" \"#{assert_path}\"")
+

@@ -13,11 +13,16 @@ COPY input-sources/ /home/debian/input-sources/
 COPY bin/build-bitcoin.sh /home/debian/
 COPY bin/sign.sh /home/debian/
 
-COPY gitian-gbuild.patch /home/debian/
-
 ## patch to not attempt removal of build directory (will be a volume)
+COPY gitian-gbuild.patch /home/debian/
 RUN cd gitian-builder && patch -p1 < ../gitian-gbuild.patch && rm ../gitian-gbuild.patch
+
+## patch to write asserts only (best for detached signatures)
+COPY gitian-gasserts.patch /home/debian/
+RUN cd gitian-builder && cp bin/gsign bin/gasserts && patch -p1 < ../gitian-gasserts.patch && rm ../gitian-gasserts.patch
 
 WORKDIR /home/debian
 
-RUN chown -R debian.debian input-sources build-bitcoin.sh sign.sh
+RUN mkdir gitian-builder/inputs
+
+RUN chown -R debian.debian input-sources build-bitcoin.sh sign.sh gitian-builder/inputs
