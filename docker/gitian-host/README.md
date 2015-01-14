@@ -1,10 +1,10 @@
 Gitian host docker container
 ============================
 
-A [Dockerfile](http://docs.docker.io/reference/builder/) to generate a [gitian-builder](https://gitian.org/) host image, that can subsequently be used for reproducible builds using LXC VMs.
+This image contains a [Dockerfile](http://docs.docker.io/reference/builder/) to generate a [gitian-builder](https://gitian.org/) host image, that can subsequently be used for reproducible builds using LXC VMs.
 
 Hierarchy:
-```<your real host (running docker daemon> -> gitian-host container -> <LXC containers to perform gbuilds>```
+```<your real host (running docker daemon)> -> gitian-host docker container -> <i386/amd64 LXC containers used to perform gbuilds>```
 
 See also https://github.com/devrandom/gitian-builder/issues/53
 
@@ -16,7 +16,9 @@ First run **scripts/build-wheezy.sh** to get a Debian Wheezy image debootstrappe
 
 **NOTE:** you must have debootstrap on your real host to run this script successfully, and also make sure you have a keyring with APT keys, see also https://wiki.debian.org/SecureApt
 
-At this point run **scripts/create-gitian-host.sh**, if all goes well then you can spawn a gitian-builder container as follows:
+At this point run **scripts/create-gitian-host.sh**, this will simply build the Dockerfile that installs the few necessary dependencies inside the prepared image.
+
+Afterwards you can spawn a gitian-host container as follows:
 
 ```
 $ scripts/spawn-gitian-host.sh
@@ -32,8 +34,8 @@ This will create a privileged container that you can access with the SSH command
 First step
 ----------
 
-As first step it is reccomended to run the script ./build-base-vms.sh; this will take a while to create the VMs.
-Once done, you have prepared a gitian builder environment for deterministic bitcoin builds. You might want to stop the container and create an image to store away so that in future you can fork from there for new builds.
+As first step it is reccomended to run the script ./build-base-vms.sh; this will take a while to create the 2 VMs.
+Once done, you have prepared a gitian builder environment for deterministic builds. You might want to stop the container and create an image to store away so that in future you can fork from there for new gitian-builder containers.
 
 Derived images
 --------------
@@ -41,4 +43,4 @@ A [bitcoin gitian host container](../gitian-bitcoin/host/README.md) is available
 
 Credits
 -------
-Thanks to jpetazzo for [dind](https://github.com/jpetazzo/dind) and to the vibrant Docker community for the help&assistance!
+Thanks to jpetazzo for [dind](https://github.com/jpetazzo/dind) and to #docker & bitcoin-dev IRC users for the help&assistance!
