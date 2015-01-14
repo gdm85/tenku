@@ -4,9 +4,24 @@ Building bitcoin with a gitian-builder Docker container
 This image allows automated gitian builds of bitcoin 0.9.1 using a docker container.
 Before proceeding make sure you have created the necessary *wheezy* and *gitian-host* images, see [these instructions](../gitian-host/README.md).
 
-Afterwards you can create this image by running [this script](../scripts/create-gitian-bitcoin-host.sh).
+Afterwards you can create the image by running [create-gitian-bitcoin-host.sh).
+](../scripts/create-gitian-bitcoin-host.sh).
 
 NOTE: this image currently supports only building of bitcoin 0.9.1, but it can be easily adapted to build other versions.
+
+Preamble
+--------
+
+It is **necessary** that before you using these scripts you read them and understand what they do.
+Why? Because your goal is to create a gitian build (deterministic) that has not been tampered with.
+
+See also:
+- https://gitian.org/
+- https://en.wikipedia.org/wiki/Web_of_trust
+- http://www.dwheeler.com/trusting-trust/
+- https://www.debian.org/
+- https://www.docker.io/
+- http://www.ubuntu.com/
 
 Preparing the gitian environment
 --------------------------------
