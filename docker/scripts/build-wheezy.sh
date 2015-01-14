@@ -50,7 +50,6 @@ else
 fi
 
 echo "Will use $KEYRING"
-exit 0
 
 ## NOTE: a temporary directory under /tmp is not used because can't be mounted dev/exec
 mkdir $DISTNAME || exit $?
