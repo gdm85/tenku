@@ -40,21 +40,27 @@ fi
 set -o pipefail && \
 MOSTRECENT="$(curl -s https://api.github.com/repos/bitcoin/bitcoin/tags | jq -r '.[0].name' | awk '{ print substr($0, 2) }')" || exit $?
 
-## volumes inside container
-SRCV="/home/debian/gitian-builder/cache/common"
-DSTV="/home/debian/gitian-build/build/out"
+## volumes inside container that are provided externally (bind mount)
+LSOURCE="$SCRIPTS/gitian-cache"
+LDEST="$SCRIPTS/gitian-built"
+CSOURCE="/home/debian/gitian-builder/cache"
+CDEST="/home/debian/gitian-builder/build"
 
 ## run all necessary containers, detached
 ## setup proper volumes for input/output collection
 function run_all() {
 	local OS
 
-	mkdir -p "$SCRIPTS/cache" "$SCRIPTS/built" && \
-	chown 1000.1000 "$SCRIPTS/cache" "$SCRIPTS/built" || return $?
+	for OS in "$@"; do
+		mkdir -p "$LSOURCE/${OS}" && \
+		rm -rf "$LDEST" && \
+		mkdir -p "$LDEST" || return $?
+	done
+	mkdir -p "$LSOURCE" "$LDEST" && \
+	chown -R 1000.1000 "$LDEST" "$LSOURCE" || return $?
 
 	for OS in "$@"; do
-		mkdir -p "$SCRIPTS/cache/${OS}-inputs" "$SCRIPTS/built/${OS}" && \
-		echo "docker run -d --privileged -v $SCRIPTS/cache/${OS}-inputs:${SRCV} -v $SCRIPTS/built/${OS}:${DSTV} gdm85/gitian-bitcoin-host" || return $?
+		echo "docker run -d --privileged -v $LSOURCE/${OS}:${CSOURCE} -v $LDEST/${OS}:$CDEST gdm85/gitian-bitcoin-host" || return $?
 	done | $PARALLEL
 }
 
@@ -72,7 +78,7 @@ function build_all() {
 		OS=${OSES[$I]}
 
 		## first, fix rights of mounted volumes
-#		echo -n "docker exec $CID chown -R debian.debian '$SRCV' '$DSTV' && " && \
+		echo -n "docker exec $CID chown -R debian.debian '$CSOURCE' '$CDEST' && " && \
 		echo "docker exec $CID su -c 'cd /home/debian && source .bash_profile && ./build-bitcoin.sh $MOSTRECENT ${OS}' debian"
 		let I+=1
 	done | $PARALLEL
@@ -83,6 +89,8 @@ echo "Building bitcoin v$MOSTRECENT on containers $CREATED" && \
 build_all $CREATED $@ && \
 echo "Build results are available in '$SCRIPTS/built/'"
 RV=$?
+
+exit $RV
 
 ## cleanup
 echo "Cleaning up created containers..."

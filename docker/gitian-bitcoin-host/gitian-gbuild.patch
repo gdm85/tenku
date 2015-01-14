@@ -1,0 +1,13 @@
+--- a/bin/gbuild	2015-01-14 10:25:27.275143892 +0100
++++ b/bin/gbuild	2015-01-14 10:25:56.171144093 +0100
+@@ -182,8 +182,8 @@
+ cache_dir = 'cache'
+ enable_cache = build_desc["enable_cache"]
+ 
+-FileUtils.rm_rf(build_dir)
+-FileUtils.mkdir(build_dir)
++## build dir is cleaned up outside container running gitian-builder
++FileUtils.mkdir_p(build_dir)
+ FileUtils.mkdir_p(result_dir)
+ 
+ package_name = build_desc["name"] or raise "must supply name"
