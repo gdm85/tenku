@@ -1,5 +1,5 @@
 #!/bin/bash
-## docker-hosts
+## docker-ports
 ##
 ## @author gdm85
 ## script to show docker allocated ports of a container
