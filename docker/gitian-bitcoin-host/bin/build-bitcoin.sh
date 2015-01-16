@@ -7,11 +7,11 @@
 #
 
 if [ $# -lt 2 ]; then
-	echo "Usage: build-bitcoin.sh version linux [win] [osx] [...]" 1>&2
+	echo "Usage: build-bitcoin.sh commit linux [win] [osx] [...]" 1>&2
 	exit 1
 fi
 
-VERSION="$1"
+COMMIT="$1"
 shift
 ## remaining parameters are OS targets to be build (e.g. win,osx,linux)
 
@@ -29,18 +29,19 @@ cd .. || exit $?
 if [ ! -d bitcoin ]; then
 	git clone https://github.com/bitcoin/bitcoin.git && \
 	cd bitcoin && \
-	git checkout v$VERSION && \
+	git checkout $COMMIT && \
 	cd .. || exit $?
 fi
 
-## old logic using descriptors (only linux supported
-if ! verlte 0.10.0rc1 ${VERSION}; then
-
+## old logic using descriptors (only linux supported)
+if echo "$COMMIT" | grep ^v >/dev/null && ! verlte v0.10.0rc1 $COMMIT; then
 	## make sure only Linux is being built
 	if [[ ! $# -eq 1 && "$1" != "linux" ]]; then
 		echo "For versions before 0.10.0rc1, only Linux building is supported" 1>&2
 		exit 1
 	fi
+
+	VERSION=$(echo "$COMMIT" | awk '{ print substr($0, 2) }')
 
 	cd gitian-builder/inputs || exit $?
 	## get each dependency
@@ -75,7 +76,7 @@ fi
 ## proceed to build of each of the specified gitian descriptors
 cd gitian-builder || exit $?
 for DESC in $@; do
-	./bin/gbuild -j$NPROC --commit bitcoin=v$VERSION -u bitcoin=$CLONE "$CLONE/contrib/gitian-descriptors/gitian-${DESC}.yml" || exit $?
+	./bin/gbuild -j$NPROC --commit bitcoin=$COMMIT -u bitcoin=$CLONE "$CLONE/contrib/gitian-descriptors/gitian-${DESC}.yml" || exit $?
 done
 
-echo "Build completed successfully, output files are in: ~/gitian-builder/build/out/"
+echo "Successfully built gitian-${DESC} at $COMMIT"

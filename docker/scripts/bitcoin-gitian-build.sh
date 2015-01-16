@@ -15,9 +15,6 @@ SCRIPTS=$(dirname $(readlink -m $0)) || exit $?
 ## place this file in script's directory in order to build for Mac OS X
 SDK=MacOSX10.7.sdk.tar.gz
 
-## change the assert directory as desired
-SIGNER="$USER"
-
 if [ $# -lt 1 ]; then
 	echo "Usage: gitian-build.sh linux [win] [osx] [...]" 1>&2
 	exit 1
@@ -42,19 +39,21 @@ else
 	fi
 fi
 
-## retrieve latest tagged release/release candidate
-set -o pipefail && \
-MOSTRECENT="$(curl -s https://api.github.com/repos/bitcoin/bitcoin/tags | jq -r '.[0].name' | awk '{ print substr($0, 2) }')" || exit $?
+## change the assert directory as desired
+if [ -z "$SIGNER" ]; then
+	SIGNER="$USER"
+fi
 
-## volumes inside container that are provided externally (bind mount)
-LRESULT="$SCRIPTS/gitian-result"
-LSIGS="$SCRIPTS/gitian-sigs"
-LSOURCE="$SCRIPTS/gitian-cache"
-LDEST="$SCRIPTS/gitian-built"
-CRESULT="/home/debian/gitian-builder/result"
-CSIGS="/home/debian/gitian.sigs"
-CSOURCE="/home/debian/gitian-builder/cache"
-CDEST="/home/debian/gitian-builder/build"
+## customize output volumes
+if [ -z "$OUTPUTDIR" ]; then
+	OUTPUTDIR="$SCRIPTS/output"
+fi
+
+function read_commit() {
+	local SHA="$1"
+	set -o pipefail && \
+	curl -s https://api.github.com/repos/bitcoin/bitcoin/commits/${SHA} | jq -r '.[0].sha'
+}
 
 ## run all necessary containers, detached
 ## setup proper volumes for input/output collection
@@ -66,7 +65,7 @@ function run_all() {
 		rm -rf "$LDEST/${OS}" && \
 		mkdir -p "$LDEST/${OS}" || return $?
 	done
-	mkdir -p "$LSIGS/${MOSTRECENT}/${SIGNER}" && \
+	mkdir -p "$LSIGS" && \
 	mkdir -p "$LSOURCE" && \
 	mkdir -p "$LRESULT" && \
 	chown -R 1000.1000 "$LDEST" "$LSOURCE" "$LSIGS" "$LRESULT" || return $?
@@ -104,28 +103,67 @@ function build_all() {
 	I=0
 	for CID in "${CREATED[@]}"; do
 		OS=${OSES[$I]}
+		local OS_LOG_FILE="$LLOGS/build-${OS}.log"
+		echo "Execution log for ${OS} ({$HCOMMIT}) --> $OS_LOG_FILE" 1>&2
 
-		## first, fix rights of mounted volumes
-#		echo -n "docker exec $CID chown -R debian.debian '$CSOURCE' '$CDEST' && " && \
-		echo -n "docker exec $CID su -c 'cd /home/debian && source .bash_profile && ./build-bitcoin.sh $MOSTRECENT ${OS} && " && \
-		echo    "cd gitian-builder && ./bin/gasserts --signer $SIGNER --release ${MOSTRECENT} --destination ../gitian.sigs/ ../bitcoin/contrib/gitian-descriptors/gitian-${OS}.yml' debian"
+		echo -n "docker exec $CID su -c 'cd /home/debian && source .bash_profile && ./build-bitcoin.sh $COMMIT ${OS} && " && \
+		echo -n "cd gitian-builder && ./bin/gasserts --signer $SIGNER --release ${HCOMMIT} --destination ../gitian.sigs/ ../bitcoin/contrib/gitian-descriptors/gitian-${OS}.yml' debian " && \
+		echo    " >> $OS_LOG_FILE 2>&1"
 		let I+=1
 	done | $PARALLEL
 }
 
+set -o pipefail || exit $?
+
+## always get latest release/rc if no commit environment was specified
+if [ ! -z "$COMMIT" ]; then
+	HCOMMIT="$COMMIT"
+else
+	HCOMMIT="$(curl -s https://api.github.com/repos/bitcoin/bitcoin/tags | jq -r '.[0].name' | awk '{ print substr($0, 2) }')" || exit $?
+fi
+
+## get commit short hash
+## NOTE: this overwrites environment provided by user
+COMMIT=$(read_commit "$HCOMMIT") || exit $?
+
+###
+### declarations for input/output data volumes
+###
+
+## always add human readable commit and commit to volume path variables
+REL_OD="$OUTPUTDIR/${HCOMMIT}-${COMMIT}"
+LRESULT="${REL_OD}/result-${HCOMMIT}-${COMMIT}"
+LSIGS="${REL_OD}/sigs"
+LDEST="${REL_OD}/built"
+LLOGS="${REL_OD}"
+## depends-cache does not sport human readable prefix, being the only input volume for containers
+LSOURCE="${OUTPUTDIR}/${COMMIT}/depends-cache"
+
+## path of above volumes inside the containers
+CRESULT="/home/debian/gitian-builder/result"
+CSIGS="/home/debian/gitian.sigs"
+CSOURCE="/home/debian/gitian-builder/cache"
+CDEST="/home/debian/gitian-builder/build"
+
+## ---------------- main -------------------- ##
+
 CREATED="$(run_all $@ | tr '\n' ' ')" && \
-echo "Building bitcoin v$MOSTRECENT for $@" && \
-build_all ${CREATED[@]} $@ && \
-echo "Build results are available in '$SCRIPTS/built/'"
+echo "Building bitcoin (${HCOMMIT}) for $@" && \
+build_all ${CREATED[@]} $@
 RV=$?
 
 ## cleanup
-echo "Cleaning up created containers..."
+#echo "Cleaning up created containers..."
 for CID in $CREATED; do
-#	docker stop $CID
-#	docker rm $CID
-	docker pause $CID
+	docker stop $CID
+	docker rm $CID
 done
 
 ## return build exit code
+if [ $RV -eq 0 ]; then
+	echo -n "Completed successfully "
+else
+	echo -n "Failed "
+fi
+echo "with exit code = $RV"
 exit $RV
