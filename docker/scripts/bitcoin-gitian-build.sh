@@ -45,6 +45,7 @@ function read_commit() {
 	set -o pipefail && \
 	OUTPUT=$(curl -s https://api.github.com/repos/bitcoin/bitcoin/commits/${SHA} | jq -r '.sha') && \
 	test ! -z "$OUTPUT" && \
+	test "$OUTPUT" != "null" && \
 	echo "$OUTPUT"
 }
 
@@ -99,6 +100,8 @@ function build_all() {
 		local OS_LOG_FILE="$LLOGS/build-${OS}.log"
 		echo "Execution log for ${OS} ({$HCOMMIT}) --> $OS_LOG_FILE" 1>&2
 
+		## disable /dev/kvm, just in case it is attempted to be used
+		echo -n "docker exec $CID rm /dev/kvm && "
 		echo -n "docker exec $CID su -c 'cd /home/debian && source .bash_profile && ./build-bitcoin.sh $COMMIT ${OS} && " && \
 		echo -n "cd gitian-builder && ./bin/gasserts --signer $SIGNER --release ${HCOMMIT} --destination ../gitian.sigs/ ../bitcoin/contrib/gitian-descriptors/gitian-${OS}.yml' debian " && \
 		echo    " >> $OS_LOG_FILE 2>&1"
@@ -122,7 +125,7 @@ set -o pipefail || exit $?
 if [ ! -z "$COMMIT" ]; then
 	HCOMMIT="$COMMIT"
 else
-	HCOMMIT="$(curl -s https://api.github.com/repos/bitcoin/bitcoin/tags | jq -r '.[0].name' | awk '{ print substr($0, 2) }')" || exit $?
+	HCOMMIT="$(curl -s https://api.github.com/repos/bitcoin/bitcoin/tags | jq -r '.[0].name')" || exit $?
 fi
 
 ## get commit short hash
