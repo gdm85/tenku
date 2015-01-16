@@ -39,20 +39,13 @@ else
 	fi
 fi
 
-## change the assert directory as desired
-if [ -z "$SIGNER" ]; then
-	SIGNER="$USER"
-fi
-
-## customize output volumes
-if [ -z "$OUTPUTDIR" ]; then
-	OUTPUTDIR="$SCRIPTS/output"
-fi
-
 function read_commit() {
 	local SHA="$1"
+	local OUTPUT
 	set -o pipefail && \
-	curl -s https://api.github.com/repos/bitcoin/bitcoin/commits/${SHA} | jq -r '.[0].sha'
+	OUTPUT=$(curl -s https://api.github.com/repos/bitcoin/bitcoin/commits/${SHA} | jq -r '.sha') && \
+	test ! -z "$OUTPUT" && \
+	echo "$OUTPUT"
 }
 
 ## run all necessary containers, detached
@@ -112,6 +105,16 @@ function build_all() {
 		let I+=1
 	done | $PARALLEL
 }
+
+## change the assert directory as desired
+if [ -z "$SIGNER" ]; then
+	SIGNER="$USER"
+fi
+
+## customize output volumes
+if [ -z "$OUTPUTDIR" ]; then
+	OUTPUTDIR="$SCRIPTS/output"
+fi
 
 set -o pipefail || exit $?
 
