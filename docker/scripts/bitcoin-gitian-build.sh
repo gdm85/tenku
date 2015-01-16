@@ -4,10 +4,14 @@
 ## @author gdm85
 ##
 ## Automatically build latest version of Bitcoin Core using
-## Docker containers (LXC) + KVM.
+## Docker containers (nested LXC).
 ##
 ## User can specify target operative systems as arguments.
-##
+## Several optional environment variables condition the build:
+## - OUTPUTDIR - where input/output volume directories will be read/created
+## - SIGNER - id of signer (no signature will be attempted, just directory structure created)
+## - COMMIT - commit/branch to use for build, by default is latest tag
+## - NOPURGE - set to non-empty to not dispose containers after build
 #
 
 SCRIPTS=$(dirname $(readlink -m $0)) || exit $?
@@ -158,12 +162,14 @@ echo "Building bitcoin (${HCOMMIT}) for $@" && \
 build_all ${CREATED[@]} $@
 RV=$?
 
-## cleanup
-#echo "Cleaning up created containers..."
-for CID in $CREATED; do
-	docker stop $CID
-	docker rm $CID
-done
+if [ -z "$NOPURGE" ]; then
+	## cleanup
+	#echo "Cleaning up created containers..."
+	for CID in $CREATED; do
+		docker stop $CID
+		docker rm $CID
+	done
+fi
 
 ## return build exit code
 if [ $RV -eq 0 ]; then
