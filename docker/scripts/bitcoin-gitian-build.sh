@@ -104,8 +104,6 @@ function build_all() {
 		local OS_LOG_FILE="$LLOGS/build-${OS}.log"
 		echo "Execution log for ${OS} ({$HCOMMIT}) --> $OS_LOG_FILE" 1>&2
 
-		## disable /dev/kvm, just in case it is attempted to be used
-		echo -n "docker exec $CID rm /dev/kvm && "
 		echo -n "docker exec $CID su -c 'cd /home/debian && source .bash_profile && ./build-bitcoin.sh $COMMIT ${OS} && " && \
 		echo -n "cd gitian-builder && ./bin/gasserts --signer $SIGNER --release ${HCOMMIT} --destination ../gitian.sigs/ ../bitcoin/contrib/gitian-descriptors/gitian-${OS}.yml' debian " && \
 		echo    " >> $OS_LOG_FILE 2>&1"
