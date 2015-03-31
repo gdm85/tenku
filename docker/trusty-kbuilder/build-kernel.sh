@@ -4,7 +4,7 @@ set -e
 
 apt-get source linux-image-$(uname -r)
 
-cd linux-3.13.0
+cd linux-*
 
 ## will fail here if no patches are available
 ## why are you recompiling kernel if no custom patches are there?
