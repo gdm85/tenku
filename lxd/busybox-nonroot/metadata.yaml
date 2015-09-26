@@ -1,0 +1,11 @@
+{
+    "architecture": "x86_64",
+    "creation_date": 1443204631,
+    "properties": {
+        "architecture": "x86_64",
+        "description": "Busybox with unprivileged user x86_64",
+        "name": "busybox-nonroot-x86_64",
+        "author": "gdm85",
+        "os": "Busybox"
+    }
+}
