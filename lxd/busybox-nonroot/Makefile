@@ -12,6 +12,7 @@ have-busybox:
 busybox-nonroot.tar.xz: have-busybox
 	TMPD=`mktemp -d` && mkdir -p "$$TMPD/rootfs/etc" && \
 	cp overlay/etc/passwd overlay/etc/group "$$TMPD/rootfs/etc/" && cd "$$TMPD" && tar xf /var/lib/lxd/images/$(BASEIMG) && \
+        chmod go+w /tmp && chmod +x /tmp && \
 	tar pcfJ $(CURDIR)/$@ rootfs/ metadata.yaml && cd && rm -rf "$$TMPD"
 
 import:
