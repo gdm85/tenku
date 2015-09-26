@@ -1,0 +1,38 @@
+{
+    "acKind": "ImageManifest",
+    "acVersion": "0.6.1",
+    "name": "gdm85/rkt-images/nginx",
+    "app":{
+        "user": "65534",
+        "group": "65534",
+        "exec":[
+            "/usr/sbin/nginx"
+        ],
+        "mountPoints": [
+            {
+                "name": "etc",
+                "path": "/etc/nginx",
+                "readOnly": true
+            },
+            {
+                "name": "www",
+                "path": "/var/www",
+                "readOnly": true
+            }
+        ],
+	"ports": [
+            {
+                "name": "www",
+                "port": 80,
+                "protocol": "tcp",
+                "socketActivated": false
+            }
+        ]
+    },
+    "annotations":[
+        {
+            "name":"authors",
+            "value":"gdm85 <gdm85@users.noreply.github.com>"
+        }
+    ]
+}
