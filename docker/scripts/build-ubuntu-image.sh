@@ -1,13 +1,12 @@
 #!/bin/bash
 ## @author gdm85
 ##
-## build a base Ubuntu Trusty
+## build a base Ubuntu image, can be Trusty, Wily etc
 #
 
 BASENAME=$(dirname $(readlink -m $0))
 
 ## the distro we are going to use
-DISTNAME=trusty
 REPOSRC=http://archive.ubuntu.com/ubuntu/
 
 if [ ! $UID -eq 0 ]; then
@@ -15,9 +14,16 @@ if [ ! $UID -eq 0 ]; then
 	exit 1
 fi
 
+if [ ! $# -eq 1 ]; then
+	echo "Usage: build-ubuntu-image.sh release-name" 1>&2
+	exit 2
+fi
+
+DISTNAME="$1"
+
 ## check for prerequisites
 if ! type -P debootstrap >/dev/null; then
-	echo "You need to install debootstrap" 1&2
+	echo "You need to install debootstrap" 1>&2
 	exit 2
 fi
 
@@ -50,7 +56,6 @@ else
 fi
 
 echo "Will use $KEYRING"
-exit 0
 
 ## NOTE: a temporary directory under /tmp is not used because can't be mounted dev/exec
 mkdir $DISTNAME || exit $?

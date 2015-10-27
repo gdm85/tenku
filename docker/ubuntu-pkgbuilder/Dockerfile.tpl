@@ -1,13 +1,12 @@
-## trusty-pkgbuilder
+## ubuntu-pkgbuilder
 ##
-## VERSION 0.1.0
+## VERSION 0.1.1
 ##
-## Trusty image to build kernel
+## Ubuntu image to build a .deb package
 ##
 #
 
-## NOTE: this image must be debootstrapped with build-trusty.sh
-FROM gdm85/trusty
+FROM %IMAGE%
 
 MAINTAINER Giuseppe Mazzotta "gdm85@users.noreply.github.com"
 
@@ -24,3 +23,5 @@ RUN apt-get remove -y logrotate
 
 ## user that will make the compilation
 RUN useradd -m -s /bin/bash rdeckard && mkdir /home/rdeckard/patches && chown rdeckard.rdeckard /home/rdeckard/patches
+
+WORKDIR /home/rdeckard
