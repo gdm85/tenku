@@ -1,2 +1,5 @@
 rkt/nginx/nginx.aci
 lxd/busybox-nonroot/busybox-nonroot.tar.xz
+
+docker/ubuntu-kernelbuilder/packages
+docker/ubuntu-kernelbuilder/patches
