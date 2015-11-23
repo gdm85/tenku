@@ -12,3 +12,5 @@ RUN mkdir build && cd build && apt-get source linux-image-$KERNEL_VERSION
 
 ## add build script
 COPY build-kernel.sh /home/rdeckard/
+
+RUN chown rdeckard.rdeckard /home/rdeckard/build-kernel.sh
