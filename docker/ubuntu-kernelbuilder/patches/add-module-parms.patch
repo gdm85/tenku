@@ -1,0 +1,44 @@
+--- a/drivers/bluetooth/btusb.c	2015-11-24 09:53:01.230539986 +0000
++++ b/drivers/bluetooth/btusb.c	2015-11-24 09:54:32.598314339 +0000
+@@ -38,6 +38,9 @@
+ static bool disable_scofix;
+ static bool force_scofix;
+ 
++static int probe_interface = 2;
++static int usb_interface = 3;
++
+ static bool reset = true;
+ 
+ static struct usb_driver btusb_driver;
+@@ -2657,7 +2660,7 @@
+ 	BT_DBG("intf %p id %p", intf, id);
+ 
+ 	/* interface numbers are hardcoded in the spec */
+-	if (intf->cur_altsetting->desc.bInterfaceNumber != 2)
++	if (intf->cur_altsetting->desc.bInterfaceNumber != probe_interface)
+ 		return -ENODEV;
+ 
+ 	if (!id->driver_info) {
+@@ -2827,7 +2830,7 @@
+ 		data->isoc = NULL;
+ 	} else {
+ 		/* Interface numbers are hardcoded in the specification */
+-		data->isoc = usb_ifnum_to_if(data->udev, 3);
++		data->isoc = usb_ifnum_to_if(data->udev, usb_interface);
+ 	}
+ 
+ 	if (!reset)
+@@ -3057,6 +3060,12 @@
+ module_param(force_scofix, bool, 0644);
+ MODULE_PARM_DESC(force_scofix, "Force fixup of wrong SCO buffers size");
+ 
++module_param(probe_interface, int, 0644);
++MODULE_PARM_DESC(probe_interface, "Interface to probe");
++
++module_param(usb_interface, int, 0644);
++MODULE_PARM_DESC(probe_interface, "USB interface to use");
++
+ module_param(reset, bool, 0644);
+ MODULE_PARM_DESC(reset, "Send HCI reset command on initialization");
+ 
+
